@@ -128,6 +128,11 @@
       margin-bottom: 12px;
     }
 
+    .listing.closed {
+      opacity: 0.72;
+      border-style: dashed;
+    }
+
     .listing-top {
       display: flex;
       justify-content: space-between;
@@ -138,6 +143,20 @@
     .listing-title {
       font-weight: 700;
       color: #fff;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      background: rgba(34, 229, 132, 0.14);
+      color: var(--accent);
+    }
+
+    .status-pill.closed {
+      background: rgba(255, 77, 90, 0.16);
+      color: var(--danger);
     }
 
     .bid-price {
@@ -231,26 +250,25 @@
 <body>
   <header>
     <div>
-      <span class="brand">// SILK HIGHWAY v0.2</span>
-      <div class="small-note">Underground Satire Network // Escrow & Friendship Ledger</div>
+      <span class="brand">// SILK HIGHWAY v0.3</span>
     </div>
     <div class="header-right">
       <div class="wallet-pill" id="walletDisplay">WALLET: 0.0050 BTC [TIER: ACQUAINTANCE]</div>
       <div class="onion-tag">http://silkhighway9x4v2.onion</div>
-      <button type="button" class="secondary" id="adminToggleBtn">[SYS-ADMIN]</button>
+      <button type="button" class="secondary" id="adminToggleBtn">[SYS-ADMIN: r4ven]</button>
     </div>
   </header>
 
   <div class="banner">
-    [PARODY SANDBOX] All Bitcoin (BTC) balances are fake monopoly money controlled exclusively by the Sys-Admin's mood and current friendship status.
+    [PARODY SANDBOX] All Bitcoin (BTC) balances are fake monopoly money controlled exclusively by Sys-Admin 'r4ven' and current friendship status.
   </div>
 
   <main class="container">
     <!-- LEFT COLUMN: AUCTIONS & NEW LISTING -->
     <section>
-      <!-- HIDDEN SYS-ADMIN VAULT -->
+      <!-- SYS-ADMIN VAULT -->
       <div class="card admin-card" id="adminPanel">
-        <h2>// SYS-ADMIN TREASURY & FRIENDSHIP TRIBUNAL</h2>
+        <h2>// SYS-ADMIN TREASURY & FRIENDSHIP TRIBUNAL (r4ven)</h2>
         <div class="small-note" style="margin-bottom:10px;">
           Grant or seize Bitcoin from any operative based on current friendship status.
         </div>
@@ -285,11 +303,10 @@
             <input id="startBid" type="number" step="0.0001" min="0.0001" value="0.0020" placeholder="Start BTC" required style="width:120px;" />
           </div>
           <div class="row">
-            <input id="vendorName" placeholder="Your Codename" required style="flex:1; min-width:140px;" />
-            <input id="itemDesc" placeholder="Joke pitch / escrow rules..." required style="flex:2; min-width:180px;" />
+            <input id="itemDesc" placeholder="Joke pitch / escrow rules..." required style="flex:1; min-width:180px;" />
           </div>
           <div class="row">
-            <button type="submit">Publish to Highway</button>
+            <button type="submit">Publish as Active Operative</button>
           </div>
         </form>
       </div>
@@ -304,7 +321,7 @@
           <button type="button" class="secondary" id="setAliasBtn">Lock Alias</button>
         </div>
         <div class="small-note" style="margin-top:6px;">
-          Your wallet & friendship tier are tied to this codename. Beg the Sys-Admin in chat for more BTC.
+          Handle <strong>r4ven</strong> is reserved exclusively for Sys-Admin. Beg r4ven in chat for more BTC.
         </div>
       </div>
 
@@ -313,7 +330,7 @@
         <div id="chatFeed" class="feed"></div>
         <form id="chatForm">
           <div class="row">
-            <input id="chatText" placeholder="Beg for BTC or talk smack..." required style="flex:1; min-width:140px;" />
+            <input id="chatText" placeholder="Beg r4ven for BTC or talk smack..." required style="flex:1; min-width:140px;" />
             <button type="submit">Send</button>
           </div>
         </form>
@@ -333,7 +350,7 @@
             </select>
           </div>
           <div class="row">
-            <textarea id="reportDetails" rows="2" placeholder="Snitch on them to the Sys-Admin..." required style="width:100%;"></textarea>
+            <textarea id="reportDetails" rows="2" placeholder="Snitch on them to r4ven..." required style="width:100%;"></textarea>
           </div>
           <div class="row">
             <button type="submit" class="danger">File Report</button>
@@ -348,14 +365,15 @@
     // =========================================================================
     // CONFIG & STORAGE ADAPTER (Ready to swap for Supabase later)
     // =========================================================================
+    const SYS_ADMIN_HANDLE = "r4ven";
     const ADMIN_PIN = "1337"; // Change this to your secret Sys-Admin PIN!
-    const STORAGE_KEY = "silk_highway_trial_v1";
-    const ALIAS_KEY = "silk_highway_my_alias";
-    const channel = new BroadcastChannel("silk_highway_channel");
+    const STORAGE_KEY = "silk_highway_trial_v3";
+    const ALIAS_KEY = "silk_highway_my_alias_v3";
+    const channel = new BroadcastChannel("silk_highway_channel_v3");
 
     const SEED_STATE = {
       wallets: {
-        "sys_admin": { btc: 999.0000, tier: "SUPREME OVERLORD" },
+        "r4ven": { btc: 999.0000, tier: "SYS-ADMIN SOVEREIGN" },
         "phantom_ping": { btc: 0.0500, tier: "CHILL ACQUAINTANCE" },
         "zero_coolish": { btc: 0.0010, tier: "ON THIN ICE" }
       },
@@ -364,27 +382,35 @@
           id: "HWY-101",
           title: "Firewall Rule #404: 'Please Don't Hack Me'",
           desc: "Enterprise security policy written at 3 AM. Escrow required.",
-          vendor: "null_byte_99",
+          vendor: "r4ven",
           highestBid: 0.0025,
-          highestBidder: "phantom_ping"
+          highestBidder: "phantom_ping",
+          isClosed: false
         },
         {
           id: "HWY-102",
           title: "1x Slightly Used Rubber Ducky (Debugging Edition)",
           desc: "Quacks softly when your code segfaults. Only serious BTC offers.",
-          vendor: "root_beer",
+          vendor: "zero_coolish",
           highestBid: 0.0150,
-          highestBidder: "zero_coolish"
+          highestBidder: "phantom_ping",
+          isClosed: false
         }
       ],
       messages: [
-        { nick: "SYS_ADMIN", text: "Silk Highway is online. Keep the memes good if you want your BTC allowance.", ts: "03:14", isSys: true },
-        { nick: "phantom_ping", text: "Yo sys_admin lend me 0.5 BTC, I swear I'm your best friend.", ts: "03:16", isSys: false }
+        { nick: "r4ven", text: "Silk Highway is live. I am r4ven. Nobody else can touch this handle.", ts: "03:14", isSys: true },
+        { nick: "phantom_ping", text: "Yo r4ven lend me 0.5 BTC, I swear I'm your best friend.", ts: "03:16", isSys: false }
       ],
       reports: [
         { id: "RPT-01", target: "zero_coolish", reason: "Broke Wallet Energy", details: "Tried to bid 0.05 BTC with 0.0010 in the vault.", ts: "03:12" }
       ]
     };
+
+    let adminUnlocked = false;
+
+    function isReservedAdminHandle(name) {
+      return String(name).trim().toLowerCase() === SYS_ADMIN_HANDLE;
+    }
 
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -406,10 +432,19 @@
     }
 
     let state = loadState();
-    let currentAlias = localStorage.getItem(ALIAS_KEY) || "anon_operative";
+
+    function initAlias() {
+      const saved = localStorage.getItem(ALIAS_KEY) || "anon_operative";
+      if (isReservedAdminHandle(saved) && !adminUnlocked) {
+        return "anon_operative";
+      }
+      return saved;
+    }
+
+    let currentAlias = initAlias();
 
     function ensureWallet(alias) {
-      const key = alias.toLowerCase();
+      const key = isReservedAdminHandle(alias) ? SYS_ADMIN_HANDLE : alias.toLowerCase();
       if (!state.wallets[key]) {
         state.wallets[key] = { btc: 0.0050, tier: "UNVERIFIED RANDOM" };
       }
@@ -439,12 +474,14 @@
     }
 
     function renderWalletHeader() {
+      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
+        currentAlias = "anon_operative";
+      }
       const wallet = ensureWallet(currentAlias);
       const display = document.getElementById("walletDisplay");
       display.textContent = `${currentAlias}: ${formatBtc(wallet.btc)} BTC [${wallet.tier}]`;
       document.getElementById("activeAliasInput").value = currentAlias;
 
-      // Update admin ledger preview
       const preview = document.getElementById("ledgerPreview");
       const entries = Object.entries(state.wallets)
         .map(([name, w]) => `${name}: ${formatBtc(w.btc)} BTC (${w.tier})`)
@@ -458,66 +495,102 @@
 
       state.listings.forEach((item) => {
         const box = document.createElement("div");
-        box.className = "listing";
+        box.className = item.isClosed ? "listing closed" : "listing";
 
         const top = document.createElement("div");
         top.className = "listing-top";
 
+        const titleWrap = document.createElement("div");
         const title = document.createElement("span");
         title.className = "listing-title";
         title.textContent = `[${item.id}] ${item.title}`;
+
+        const pill = document.createElement("span");
+        pill.className = item.isClosed ? "status-pill closed" : "status-pill";
+        pill.textContent = item.isClosed ? "ENDED" : "LIVE";
+
+        titleWrap.append(title, pill);
 
         const bid = document.createElement("span");
         bid.className = "bid-price";
         bid.textContent = `${formatBtc(item.highestBid)} BTC`;
 
-        top.append(title, bid);
+        top.append(titleWrap, bid);
 
         const meta = document.createElement("div");
         meta.className = "meta";
-        meta.textContent = `Vendor: ${item.vendor} | Top Bidder: ${item.highestBidder || "None"} — ${item.desc}`;
+        meta.textContent = `Listed by: ${item.vendor} | Top Bidder: ${item.highestBidder || "None"} — ${item.desc}`;
 
-        const bidRow = document.createElement("div");
-        bidRow.className = "row";
+        box.append(top, meta);
 
-        const amountInput = document.createElement("input");
-        amountInput.type = "number";
-        amountInput.step = "0.0001";
-        amountInput.min = formatBtc(item.highestBid + 0.0005);
-        amountInput.value = formatBtc(item.highestBid + 0.0010);
-        amountInput.style.width = "125px";
+        const controlsRow = document.createElement("div");
+        controlsRow.className = "row";
 
-        const bidBtn = document.createElement("button");
-        bidBtn.className = "btc-btn";
-        bidBtn.textContent = `Bid as ${currentAlias}`;
-        bidBtn.onclick = () => {
-          const wallet = ensureWallet(currentAlias);
-          const nextBid = Number(amountInput.value);
+        if (!item.isClosed) {
+          const amountInput = document.createElement("input");
+          amountInput.type = "number";
+          amountInput.step = "0.0001";
+          amountInput.min = formatBtc(item.highestBid + 0.0005);
+          amountInput.value = formatBtc(item.highestBid + 0.0010);
+          amountInput.style.width = "125px";
 
-          if (!Number.isFinite(nextBid) || nextBid <= item.highestBid) {
-            alert(`Bid must be higher than ${formatBtc(item.highestBid)} BTC.`);
-            return;
-          }
-          if (wallet.btc < nextBid) {
-            alert(`INSUFFICIENT BITCOIN (${formatBtc(wallet.btc)} BTC). Go flatter the Sys-Admin in chat to boost your friendship tier!`);
-            return;
-          }
+          const bidBtn = document.createElement("button");
+          bidBtn.className = "btc-btn";
+          bidBtn.textContent = `Bid as ${currentAlias}`;
+          bidBtn.onclick = () => {
+            const wallet = ensureWallet(currentAlias);
+            const nextBid = Number(amountInput.value);
 
-          wallet.btc = Math.max(0, Number((wallet.btc - nextBid).toFixed(4)));
-          item.highestBid = nextBid;
-          item.highestBidder = currentAlias;
+            if (!Number.isFinite(nextBid) || nextBid <= item.highestBid) {
+              alert(`Bid must be higher than ${formatBtc(item.highestBid)} BTC.`);
+              return;
+            }
+            if (wallet.btc < nextBid) {
+              alert(`INSUFFICIENT BITCOIN (${formatBtc(wallet.btc)} BTC). Beg r4ven in chat for more BTC!`);
+              return;
+            }
 
-          state.messages.push({
-            nick: "ESCROW_BOT",
-            text: `${currentAlias} locked ${formatBtc(nextBid)} BTC on ${item.id} (${item.title}).`,
-            ts: nowTime(),
-            isSys: true
-          });
-          saveState(state);
-        };
+            wallet.btc = Math.max(0, Number((wallet.btc - nextBid).toFixed(4)));
+            item.highestBid = nextBid;
+            item.highestBidder = currentAlias;
 
-        bidRow.append(amountInput, bidBtn);
-        box.append(top, meta, bidRow);
+            state.messages.push({
+              nick: "ESCROW_BOT",
+              text: `${currentAlias} locked ${formatBtc(nextBid)} BTC on ${item.id} (${item.title}).`,
+              ts: nowTime(),
+              isSys: true
+            });
+            saveState(state);
+          };
+
+          controlsRow.append(amountInput, bidBtn);
+        }
+
+        const isOwner = item.vendor.toLowerCase() === currentAlias.toLowerCase() || (adminUnlocked && currentAlias === SYS_ADMIN_HANDLE);
+        if (!item.isClosed && isOwner) {
+          const endBtn = document.createElement("button");
+          endBtn.className = "danger";
+          endBtn.textContent = "End Auction";
+          endBtn.onclick = () => {
+            item.isClosed = true;
+            const winnerText = item.highestBidder && item.highestBidder !== "None yet"
+              ? `Won by ${item.highestBidder} for ${formatBtc(item.highestBid)} BTC.`
+              : "Ended with zero bids.";
+            state.messages.push({
+              nick: "HIGHWAY_INDEX",
+              text: `Auction [${item.id}] "${item.title}" ended by ${currentAlias}. ${winnerText}`,
+              ts: nowTime(),
+              isSys: true
+            });
+            saveState(state);
+          };
+          controlsRow.append(endBtn);
+        }
+
+        if (controlsRow.childNodes.length > 0) {
+          box.appendChild(controlsRow);
+        }
+
         container.appendChild(box);
       });
     }
@@ -584,22 +657,35 @@
     // =========================================================================
     document.getElementById("adminToggleBtn").addEventListener("click", () => {
       const panel = document.getElementById("adminPanel");
-      if (panel.classList.contains("open")) {
+      if (adminUnlocked && panel.classList.contains("open")) {
         panel.classList.remove("open");
         return;
       }
-      const pin = prompt("Enter Sys-Admin Vault PIN:");
+      const pin = prompt("Enter Sys-Admin (r4ven) Vault PIN:");
       if (pin === ADMIN_PIN) {
+        adminUnlocked = true;
+        currentAlias = SYS_ADMIN_HANDLE;
+        localStorage.setItem(ALIAS_KEY, currentAlias);
+        ensureWallet(currentAlias);
         panel.classList.add("open");
+        renderAll();
       } else if (pin !== null) {
-        alert("ACCESS DENIED. Incident logged to Sys-Admin.");
+        alert("ACCESS DENIED. Only r4ven holds the keys.");
       }
     });
 
     document.getElementById("adminTreasuryForm").addEventListener("submit", (e) => {
       e.preventDefault();
+      if (!adminUnlocked || currentAlias !== SYS_ADMIN_HANDLE) {
+        alert("Sys-Admin authentication required.");
+        return;
+      }
       const target = escapeClean(document.getElementById("targetOperative").value).toLowerCase();
       if (!target) return;
+      if (isReservedAdminHandle(target)) {
+        alert("r4ven does not need treasury decrees—r4ven owns the vault.");
+        return;
+      }
 
       const presetRaw = document.getElementById("friendshipPreset").value.split("|");
       const customDeltaRaw = document.getElementById("customBtcDelta").value;
@@ -615,8 +701,8 @@
 
       const actionWord = delta >= 0 ? `granted +${formatBtc(delta)} BTC to` : `seized ${formatBtc(Math.abs(delta))} BTC from`;
       state.messages.push({
-        nick: "SYS_ADMIN",
-        text: `DECREE: Sys-Admin ${actionWord} [${target}]. New Status: ${newTier} (${formatBtc(wallet.btc)} BTC).`,
+        nick: SYS_ADMIN_HANDLE,
+        text: `DECREE: r4ven ${actionWord} [${target}]. New Status: ${newTier} (${formatBtc(wallet.btc)} BTC).`,
         ts: nowTime(),
         isSys: true
       });
@@ -628,6 +714,20 @@
     document.getElementById("setAliasBtn").addEventListener("click", () => {
       const nextAlias = escapeClean(document.getElementById("activeAliasInput").value);
       if (!nextAlias) return;
+
+      if (isReservedAdminHandle(nextAlias) && !adminUnlocked) {
+        alert("Nice try. 'r4ven' is locked to the Sys-Admin and cannot be claimed.");
+        document.getElementById("activeAliasInput").value = currentAlias;
+        state.messages.push({
+          nick: "SECURITY_DAEMON",
+          text: `ALERT: ${currentAlias} tried to impersonate Sys-Admin 'r4ven'. Blocked.`,
+          ts: nowTime(),
+          isSys: true
+        });
+        saveState(state);
+        return;
+      }
+
       currentAlias = nextAlias;
       localStorage.setItem(ALIAS_KEY, currentAlias);
       ensureWallet(currentAlias);
@@ -636,9 +736,11 @@
 
     document.getElementById("newListingForm").addEventListener("submit", (e) => {
       e.preventDefault();
+      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
+        currentAlias = "anon_operative";
+      }
       const title = escapeClean(document.getElementById("itemTitle").value);
       const startBid = Math.max(0.0001, Number(document.getElementById("startBid").value) || 0.001);
-      const vendor = escapeClean(document.getElementById("vendorName").value) || currentAlias;
       const desc = escapeClean(document.getElementById("itemDesc").value);
       if (!title || !desc) return;
 
@@ -647,13 +749,14 @@
         id,
         title,
         desc,
-        vendor,
+        vendor: currentAlias,
         highestBid: startBid,
-        highestBidder: "None yet"
+        highestBidder: "None yet",
+        isClosed: false
       });
       state.messages.push({
         nick: "HIGHWAY_INDEX",
-        text: `New listing [${id}] "${title}" by ${vendor} starting at ${formatBtc(startBid)} BTC.`,
+        text: `New listing [${id}] "${title}" by ${currentAlias} starting at ${formatBtc(startBid)} BTC.`,
         ts: nowTime(),
         isSys: true
       });
@@ -663,6 +766,9 @@
 
     document.getElementById("chatForm").addEventListener("submit", (e) => {
       e.preventDefault();
+      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
+        currentAlias = "anon_operative";
+      }
       const text = escapeClean(document.getElementById("chatText").value);
       if (!text) return;
 
@@ -671,7 +777,7 @@
         nick: currentAlias,
         text,
         ts: nowTime(),
-        isSys: currentAlias.toLowerCase() === "sys_admin"
+        isSys: isReservedAdminHandle(currentAlias) && adminUnlocked
       });
       document.getElementById("chatText").value = "";
       saveState(state);
@@ -688,7 +794,7 @@
       state.reports.push({ id, target, reason, details, ts: nowTime() });
       state.messages.push({
         nick: "SNITCH_DESK",
-        text: `Report ${id} filed against ${target} (${reason}). Sys-Admin notified.`,
+        text: `Report ${id} filed against ${target} (${reason}). r4ven notified.`,
         ts: nowTime(),
         isSys: true
       });
