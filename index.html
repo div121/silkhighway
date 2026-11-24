@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SILK HIGHWAY //</title>
+  <title>SILK HIGHWAY // Satirical Darknet Sandbox</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #070908;
@@ -119,6 +120,14 @@
     }
 
     .admin-card h2 { color: var(--btc); }
+
+    h3 {
+      margin: 14px 0 8px;
+      font-size: 12px;
+      color: var(--btc);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
 
     .listing {
       background: var(--panel-2);
@@ -262,36 +271,47 @@
     .lb-user.admin-user { color: var(--btc); }
     .lb-tier { font-size: 10px; color: var(--muted); }
     .lb-btc { color: var(--btc); font-weight: 700; white-space: nowrap; }
+
+    .user-mgmt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+    .user-mgmt-row:last-child { border-bottom: none; }
   </style>
 </head>
 <body>
   <header>
     <div>
-      <span class="brand">// SILK HIGHWAY v0.4</span>
+      <span class="brand">// SILK HIGHWAY</span>
     </div>
     <div class="header-right">
-      <div class="wallet-pill" id="walletDisplay">WALLET: 0.0050 BTC [TIER: ACQUAINTANCE]</div>
+      <div class="wallet-pill" id="walletDisplay">GUEST (LOG IN TO PLAY)</div>
       <div class="onion-tag">http://silkhighway9x4v2.onion</div>
       <button type="button" class="secondary" id="adminToggleBtn">[SYS-ADMIN: r4ven]</button>
     </div>
   </header>
 
   <div class="banner">
-    [PARODY SANDBOX] Max wallet cap: 100,000.0000 BTC. All balances are fake monopoly money controlled by Sys-Admin 'r4ven' and friendship status.
+    [PARODY SANDBOX] Max wallet cap: 100,000.0000 BTC. Alphanumeric passwords (6+ chars, letters &amp; numbers) required for cross-device accounts.
   </div>
 
   <main class="container">
-    <!-- LEFT COLUMN: AUCTIONS & NEW LISTING -->
     <section>
-      <!-- SYS-ADMIN VAULT -->
       <div class="card admin-card" id="adminPanel">
-        <h2>// SYS-ADMIN TREASURY & FRIENDSHIP TRIBUNAL (r4ven)</h2>
-        <div class="small-note" style="margin-bottom:10px;">
-          Grant, mint, or seize Bitcoin (up to 100,000.0000 BTC cap) for any operative including r4ven.
+        <h2>// SYS-ADMIN TREASURY &amp; OPERATIVE CONTROL (r4ven)</h2>
+        <div class="small-note">
+          Grant/seize BTC via friendship presets, or edit/reset passwords/delete any operative account below.
         </div>
+
+        <h3>1. Quick Friendship Decree</h3>
         <form id="adminTreasuryForm">
           <div class="row">
-            <input id="targetOperative" placeholder="Operative Codename (or r4ven)" required style="flex:1; min-width:140px;" />
+            <input id="targetOperative" placeholder="Username (or r4ven)" required style="flex:1; min-width:140px;" />
             <select id="friendshipPreset">
               <option value="Day-One Homie (+2.5000 BTC)|2.5|DAY-ONE HOMIE">Day-One Homie (+2.5000 BTC)</option>
               <option value="Sent Good Memes (+0.5000 BTC)|0.5|MEME DEALER">Sent Good Memes (+0.5000 BTC)</option>
@@ -301,14 +321,29 @@
           </div>
           <div class="row">
             <input id="customBtcDelta" type="number" step="0.0001" placeholder="Or custom +/- BTC (e.g. 25000 or -0.5)" style="flex:1;" />
-            <button type="submit" class="btc-btn">Execute Treasury Decree</button>
+            <button type="submit" class="btc-btn">Execute Decree</button>
           </div>
         </form>
-        <div id="ledgerPreview" class="small-note" style="margin-top:10px;"></div>
+
+        <h3>2. Full User Modification &amp; Password Reset</h3>
+        <form id="adminModifyUserForm">
+          <div class="row">
+            <input id="modUsername" placeholder="Target Username" required style="flex:1; min-width:130px;" />
+            <input id="modExactBtc" type="number" step="0.0001" min="0" max="100000" placeholder="Set Exact BTC" required style="width:135px;" />
+          </div>
+          <div class="row">
+            <input id="modTier" placeholder="New Tier Title (e.g. INNER CIRCLE)" required style="flex:1; min-width:140px;" />
+            <input id="modNewPassword" type="text" placeholder="Optional: New Alphanumeric Pass" style="flex:1; min-width:140px;" />
+            <button type="submit" class="btc-btn">Update User</button>
+          </div>
+        </form>
+
+        <h3>3. Registered Operatives</h3>
+        <div id="adminUserRoster" class="feed" style="max-height: 165px;"></div>
       </div>
 
       <div class="card">
-        <h2>Live Auctions & Parody Contracts</h2>
+        <h2>Live Auctions &amp; Parody Contracts</h2>
         <div id="listingsContainer"></div>
       </div>
 
@@ -323,28 +358,31 @@
             <input id="itemDesc" placeholder="Joke pitch / escrow rules..." required style="flex:1; min-width:180px;" />
           </div>
           <div class="row">
-            <button type="submit">Publish as Active Operative</button>
+            <button type="submit">Publish as Logged-In Operative</button>
           </div>
         </form>
       </div>
     </section>
 
-    <!-- RIGHT COLUMN: LEADERBOARD, COMMS CHAT & REPORT DESK -->
     <aside>
       <div class="card">
-        <h2>BTC Rich-List Leaderboard</h2>
-        <div id="leaderboardList" class="feed" style="max-height: 185px;"></div>
+        <h2>Operative Account (Any Device)</h2>
+        <form id="authForm">
+          <div class="row">
+            <input id="authAliasInput" placeholder="Username" required style="flex:1; min-width:125px;" />
+            <input id="authPassInput" type="password" placeholder="Alphanumeric Pass (6+)" minlength="6" required style="flex:1; min-width:125px;" />
+            <button type="submit" class="secondary">Login / Register</button>
+          </div>
+        </form>
+        <div class="row" style="justify-content: space-between;">
+          <span class="small-note" id="authStatusText">Use letters + numbers (6+ chars) to register or log in.</span>
+          <button type="button" class="secondary" id="logoutBtn" style="padding:4px 8px; font-size:11px;">Logout</button>
+        </div>
       </div>
 
       <div class="card">
-        <h2>Active Operative Identity</h2>
-        <div class="row">
-          <input id="activeAliasInput" placeholder="Set your codename..." style="flex:1;" />
-          <button type="button" class="secondary" id="setAliasBtn">Lock Alias</button>
-        </div>
-        <div class="small-note" style="margin-top:6px;">
-          Handle <strong>r4ven</strong> is reserved exclusively for Sys-Admin. Beg r4ven in chat for more BTC.
-        </div>
+        <h2>BTC Rich-List Leaderboard</h2>
+        <div id="leaderboardList" class="feed" style="max-height: 185px;"></div>
       </div>
 
       <div class="card">
@@ -359,7 +397,7 @@
       </div>
 
       <div class="card">
-        <h2>Dispute & Snitch Report Desk</h2>
+        <h2>Dispute &amp; Snitch Report Desk</h2>
         <div id="reportsFeed" class="feed"></div>
         <form id="reportForm">
           <div class="row">
@@ -376,7 +414,6 @@
           </div>
           <div class="row">
             <button type="submit" class="danger">File Report</button>
-            <button type="button" id="resetDemoBtn" class="secondary">Reset Trial Data</button>
           </div>
         </form>
       </div>
@@ -384,138 +421,204 @@
   </main>
 
   <script>
-    // =========================================================================
-    // CONFIG & STORAGE ADAPTER (Ready to swap for Supabase later)
-    // =========================================================================
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const SYS_ADMIN_HANDLE = "r4ven";
-    const ADMIN_PIN = "1337"; // Change this to your secret Sys-Admin PIN!
     const MAX_BTC_CAP = 100000;
-    const STORAGE_KEY = "silk_highway_trial_v4";
-    const ALIAS_KEY = "silk_highway_my_alias_v4";
-    const channel = new BroadcastChannel("silk_highway_channel_v4");
+    const SESSION_KEY = "silk_highway_session_final";
 
-    const SEED_STATE = {
-      wallets: {
-        "r4ven": { btc: 5000.0000, tier: "SYS-ADMIN SOVEREIGN" },
-        "phantom_ping": { btc: 0.0500, tier: "CHILL ACQUAINTANCE" },
-        "zero_coolish": { btc: 0.0010, tier: "ON THIN ICE" }
-      },
-      listings: [
-        {
-          id: "HWY-101",
-          title: "Firewall Rule #404: 'Please Don't Hack Me'",
-          desc: "Enterprise security policy written at 3 AM. Escrow required.",
-          vendor: "r4ven",
-          highestBid: 0.0025,
-          highestBidder: "phantom_ping",
-          isClosed: false
-        },
-        {
-          id: "HWY-102",
-          title: "1x Slightly Used Rubber Ducky (Debugging Edition)",
-          desc: "Quacks softly when your code segfaults. Only serious BTC offers.",
-          vendor: "zero_coolish",
-          highestBid: 0.0150,
-          highestBidder: "phantom_ping",
-          isClosed: false
-        }
-      ],
-      messages: [
-        { nick: "r4ven", text: "Silk Highway v0.4 is live. 100k BTC cap unlocked and the leaderboard is watching.", ts: "03:14", isSys: true },
-        { nick: "phantom_ping", text: "Yo r4ven lend me 0.5 BTC, I swear I'm your best friend.", ts: "03:16", isSys: false }
-      ],
-      reports: [
-        { id: "RPT-01", target: "zero_coolish", reason: "Broke Wallet Energy", details: "Tried to bid 0.05 BTC with 0.0010 in the vault.", ts: "03:12" }
-      ]
-    };
-
-    let adminUnlocked = false;
+    let state = { wallets: {}, listings: [], messages: [], reports: [] };
+    let sessionAdminPin = "";
+    let currentHandle = null;
+    let currentDisplayName = null;
+    let refreshTimer = null;
 
     function isReservedAdminHandle(name) {
       return String(name).trim().toLowerCase() === SYS_ADMIN_HANDLE;
     }
 
+    function isAdminUnlocked() {
+      return currentHandle === SYS_ADMIN_HANDLE && sessionAdminPin.length > 0;
+    }
+
+    function isValidAlphanumericPass(pw) {
+      return typeof pw === "string" && pw.length >= 6 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw);
+    }
+
     function clampBtc(amount) {
-      const clamped = Math.min(MAX_BTC_CAP, Math.max(0, Number(amount)));
-      return Number(clamped.toFixed(4));
-    }
-
-    function loadState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_STATE));
-        return structuredClone(SEED_STATE);
-      }
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return structuredClone(SEED_STATE);
-      }
-    }
-
-    function saveState(nextState) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-      channel.postMessage({ type: "STATE_UPDATED" });
-      renderAll();
-    }
-
-    let state = loadState();
-
-    function initAlias() {
-      const saved = localStorage.getItem(ALIAS_KEY) || "anon_operative";
-      if (isReservedAdminHandle(saved) && !adminUnlocked) {
-        return "anon_operative";
-      }
-      return saved;
-    }
-
-    let currentAlias = initAlias();
-
-    function ensureWallet(alias) {
-      const key = isReservedAdminHandle(alias) ? SYS_ADMIN_HANDLE : alias.toLowerCase();
-      if (!state.wallets[key]) {
-        state.wallets[key] = { btc: 0.0050, tier: "UNVERIFIED RANDOM" };
-      } else {
-        state.wallets[key].btc = clampBtc(state.wallets[key].btc);
-      }
-      return state.wallets[key];
-    }
-
-    channel.onmessage = (event) => {
-      if (event.data?.type === "STATE_UPDATED") {
-        state = loadState();
-        renderAll();
-      }
-    };
-
-    // =========================================================================
-    // HELPERS & RENDERERS
-    // =========================================================================
-    function nowTime() {
-      return new Date().toTimeString().slice(0, 5);
-    }
-
-    function escapeClean(str) {
-      return String(str).trim().slice(0, 220);
+      return Number(Math.min(MAX_BTC_CAP, Math.max(0, Number(amount))).toFixed(4));
     }
 
     function formatBtc(num) {
       return clampBtc(num).toFixed(4);
     }
 
+    function escapeClean(str) {
+      return String(str).trim().slice(0, 220);
+    }
+
+    function formatTs(iso) {
+      if (!iso) return "--:--";
+      return new Date(iso).toTimeString().slice(0, 5);
+    }
+
+    async function hashPassword(handle, password) {
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(`${handle.toLowerCase()}:${password}`),
+        "PBKDF2",
+        false,
+        ["deriveBits"]
+      );
+      const bits = await crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt: enc.encode("silk_highway_salt_final"),
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+      );
+      return Array.from(new Uint8Array(bits))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function refreshAllFromDB() {
+      const [wRes, lRes, mRes, rRes] = await Promise.all([
+        db.from("wallets").select("handle, display_name, btc, tier"),
+        db.from("listings").select("*").order("created_at", { ascending: false }),
+        db.from("messages").select("*").order("id", { ascending: true }).limit(150),
+        db.from("reports").select("*").order("created_at", { ascending: true }).limit(50)
+      ]);
+
+      if (wRes.data) {
+        const map = {};
+        wRes.data.forEach((w) => {
+          map[w.handle] = {
+            displayName: w.display_name || w.handle,
+            btc: Number(w.btc),
+            tier: w.tier
+          };
+        });
+        state.wallets = map;
+
+        if (currentHandle && !isAdminUnlocked() && !map[currentHandle]) {
+          currentHandle = null;
+          currentDisplayName = null;
+          localStorage.removeItem(SESSION_KEY);
+          alert("Your account was removed by Sys-Admin r4ven.");
+        }
+      }
+      if (lRes.data) state.listings = lRes.data;
+      if (mRes.data) state.messages = mRes.data;
+      if (rRes.data) state.reports = rRes.data;
+
+      renderAll();
+    }
+
+    function scheduleRefresh() {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        refreshAllFromDB();
+      }, 150);
+    }
+
+    db.channel("silk-highway-live")
+      .on("postgres_changes", { event: "*", schema: "public" }, () => {
+        scheduleRefresh();
+      })
+      .subscribe();
+
+    function renderWalletHeader() {
+      const display = document.getElementById("walletDisplay");
+      const statusEl = document.getElementById("authStatusText");
+
+      if (!currentHandle) {
+        display.textContent = "GUEST (LOG IN TO PLAY)";
+        statusEl.textContent = "Use letters + numbers (6+ chars) to register or log in.";
+        return;
+      }
+
+      const wallet = state.wallets[currentHandle] || { displayName: currentDisplayName || currentHandle, btc: 0.0050, tier: "UNVERIFIED RANDOM" };
+      const shownName = wallet.displayName || currentDisplayName || currentHandle;
+      display.textContent = `${shownName}: ${formatBtc(wallet.btc)} BTC [${wallet.tier}]`;
+      statusEl.innerHTML = `Logged in as <strong>${shownName}</strong>.`;
+    }
+
+    function renderAdminRoster() {
+      const rosterEl = document.getElementById("adminUserRoster");
+      if (!rosterEl) return;
+      rosterEl.innerHTML = "";
+
+      const users = Object.entries(state.wallets).sort((a, b) => b[1].btc - a[1].btc);
+      users.forEach(([handle, info]) => {
+        const row = document.createElement("div");
+        row.className = "user-mgmt-row";
+
+        const label = document.createElement("span");
+        label.textContent = `${info.displayName || handle} — ${formatBtc(info.btc)} BTC [${info.tier}]`;
+
+        const btns = document.createElement("div");
+        btns.style.display = "flex";
+        btns.style.gap = "6px";
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "secondary";
+        editBtn.style.padding = "3px 7px";
+        editBtn.style.fontSize = "11px";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = () => {
+          document.getElementById("modUsername").value = handle;
+          document.getElementById("modExactBtc").value = formatBtc(info.btc);
+          document.getElementById("modTier").value = info.tier;
+          document.getElementById("modNewPassword").value = "";
+        };
+        btns.appendChild(editBtn);
+
+        if (handle !== SYS_ADMIN_HANDLE) {
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "danger";
+          delBtn.style.padding = "3px 7px";
+          delBtn.style.fontSize = "11px";
+          delBtn.textContent = "Delete";
+          delBtn.onclick = async () => {
+            if (!confirm(`Delete operative '${info.displayName || handle}' and remove their listings?`)) return;
+            const { error } = await db.rpc("r4ven_delete_user", {
+              p_pin: sessionAdminPin,
+              p_target: handle
+            });
+            if (error) alert(error.message);
+            else await refreshAllFromDB();
+          };
+          btns.appendChild(delBtn);
+        }
+
+        row.append(label, btns);
+        rosterEl.appendChild(row);
+      });
+    }
+
     function renderLeaderboard() {
       const listEl = document.getElementById("leaderboardList");
       listEl.innerHTML = "";
 
-      const sorted = Object.entries(state.wallets)
+      const entries = Object.entries(state.wallets)
         .map(([handle, info]) => ({
           handle,
+          displayName: info.displayName || handle,
           btc: clampBtc(info.btc),
           tier: info.tier || "OPERATIVE"
         }))
         .sort((a, b) => b.btc - a.btc);
 
-      sorted.forEach((entry, idx) => {
+      entries.forEach((entry, idx) => {
         const row = document.createElement("div");
         row.className = "lb-row";
 
@@ -526,7 +629,7 @@
 
         const user = document.createElement("span");
         user.className = entry.handle === SYS_ADMIN_HANDLE ? "lb-user admin-user" : "lb-user";
-        user.textContent = ` ${entry.handle}`;
+        user.textContent = ` ${entry.displayName}`;
 
         const tier = document.createElement("div");
         tier.className = "lb-tier";
@@ -544,29 +647,18 @@
       });
     }
 
-    function renderWalletHeader() {
-      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
-        currentAlias = "anon_operative";
-      }
-      const wallet = ensureWallet(currentAlias);
-      const display = document.getElementById("walletDisplay");
-      display.textContent = `${currentAlias}: ${formatBtc(wallet.btc)} BTC [${wallet.tier}]`;
-      document.getElementById("activeAliasInput").value = currentAlias;
-
-      const preview = document.getElementById("ledgerPreview");
-      const entries = Object.entries(state.wallets)
-        .map(([name, w]) => `${name}: ${formatBtc(w.btc)} BTC (${w.tier})`)
-        .join(" | ");
-      preview.textContent = `Active Ledger (Max ${MAX_BTC_CAP.toLocaleString()} BTC): ${entries}`;
-    }
-
     function renderListings() {
       const container = document.getElementById("listingsContainer");
       container.innerHTML = "";
 
+      if (state.listings.length === 0) {
+        container.innerHTML = `<div class="small-note">No active listings yet.</div>`;
+        return;
+      }
+
       state.listings.forEach((item) => {
         const box = document.createElement("div");
-        box.className = item.isClosed ? "listing closed" : "listing";
+        box.className = item.is_closed ? "listing closed" : "listing";
 
         const top = document.createElement("div");
         top.className = "listing-top";
@@ -577,96 +669,68 @@
         title.textContent = `[${item.id}] ${item.title}`;
 
         const pill = document.createElement("span");
-        pill.className = item.isClosed ? "status-pill closed" : "status-pill";
-        pill.textContent = item.isClosed ? "ENDED" : "LIVE";
-
+        pill.className = item.is_closed ? "status-pill closed" : "status-pill";
+        pill.textContent = item.is_closed ? "ENDED" : "LIVE";
         titleWrap.append(title, pill);
 
         const bid = document.createElement("span");
         bid.className = "bid-price";
-        bid.textContent = `${formatBtc(item.highestBid)} BTC`;
+        bid.textContent = `${formatBtc(item.highest_bid)} BTC`;
 
         top.append(titleWrap, bid);
 
         const meta = document.createElement("div");
         meta.className = "meta";
-        meta.textContent = `Listed by: ${item.vendor} | Top Bidder: ${item.highestBidder || "None"} — ${item.desc}`;
-
+        meta.textContent = `Listed by: ${item.vendor} | Top Bidder: ${item.highest_bidder || "None"} — ${item.description}`;
         box.append(top, meta);
 
         const controlsRow = document.createElement("div");
         controlsRow.className = "row";
 
-        if (!item.isClosed) {
+        if (!item.is_closed) {
           const amountInput = document.createElement("input");
           amountInput.type = "number";
           amountInput.step = "0.0001";
-          amountInput.min = formatBtc(item.highestBid + 0.0005);
+          amountInput.min = formatBtc(Number(item.highest_bid) + 0.0005);
           amountInput.max = String(MAX_BTC_CAP);
-          amountInput.value = formatBtc(item.highestBid + 0.0010);
+          amountInput.value = formatBtc(Number(item.highest_bid) + 0.0010);
           amountInput.style.width = "135px";
 
           const bidBtn = document.createElement("button");
           bidBtn.className = "btc-btn";
-          bidBtn.textContent = `Bid as ${currentAlias}`;
-          bidBtn.onclick = () => {
-            const wallet = ensureWallet(currentAlias);
+          bidBtn.textContent = currentHandle ? `Bid as ${currentDisplayName || currentHandle}` : "Log In to Bid";
+          bidBtn.onclick = async () => {
+            if (!currentHandle) return alert("Log in with your username & password first.");
             const nextBid = Number(amountInput.value);
+            const { error } = isAdminUnlocked()
+              ? await db.rpc("r4ven_place_bid", { p_pin: sessionAdminPin, p_listing_id: item.id, p_amount: nextBid })
+              : await db.rpc("place_bid", { p_listing_id: item.id, p_bidder: currentHandle, p_amount: nextBid });
 
-            if (!Number.isFinite(nextBid) || nextBid <= item.highestBid) {
-              alert(`Bid must be higher than ${formatBtc(item.highestBid)} BTC.`);
-              return;
-            }
-            if (nextBid > MAX_BTC_CAP) {
-              alert(`Max allowed bid is ${MAX_BTC_CAP.toLocaleString()}.0000 BTC.`);
-              return;
-            }
-            if (wallet.btc < nextBid) {
-              alert(`INSUFFICIENT BITCOIN (${formatBtc(wallet.btc)} BTC). Beg r4ven in chat for more BTC!`);
-              return;
-            }
-
-            wallet.btc = clampBtc(wallet.btc - nextBid);
-            item.highestBid = clampBtc(nextBid);
-            item.highestBidder = currentAlias;
-
-            state.messages.push({
-              nick: "ESCROW_BOT",
-              text: `${currentAlias} locked ${formatBtc(nextBid)} BTC on ${item.id} (${item.title}).`,
-              ts: nowTime(),
-              isSys: true
-            });
-            saveState(state);
+            if (error) alert(`Bid rejected: ${error.message}`);
+            else await refreshAllFromDB();
           };
 
           controlsRow.append(amountInput, bidBtn);
         }
 
-        const isOwner = item.vendor.toLowerCase() === currentAlias.toLowerCase() || (adminUnlocked && currentAlias === SYS_ADMIN_HANDLE);
-        if (!item.isClosed && isOwner) {
+        const isOwner = currentHandle && (item.vendor.toLowerCase() === currentHandle.toLowerCase() || isAdminUnlocked());
+        if (!item.is_closed && isOwner) {
           const endBtn = document.createElement("button");
           endBtn.className = "danger";
           endBtn.textContent = "End Auction";
-          endBtn.onclick = () => {
-            item.isClosed = true;
-            const winnerText = item.highestBidder && item.highestBidder !== "None yet"
-              ? `Won by ${item.highestBidder} for ${formatBtc(item.highestBid)} BTC.`
-              : "Ended with zero bids.";
-            state.messages.push({
-              nick: "HIGHWAY_INDEX",
-              text: `Auction [${item.id}] "${item.title}" ended by ${currentAlias}. ${winnerText}`,
-              ts: nowTime(),
-              isSys: true
+          endBtn.onclick = async () => {
+            const { error } = await db.rpc("end_auction", {
+              p_listing_id: item.id,
+              p_actor: currentHandle,
+              p_admin_pin: isAdminUnlocked() ? sessionAdminPin : ""
             });
-            saveState(state);
+            if (error) alert(error.message);
+            else await refreshAllFromDB();
           };
           controlsRow.append(endBtn);
         }
 
-        if (controlsRow.childNodes.length > 0) {
-          box.appendChild(controlsRow);
-        }
-
+        if (controlsRow.childNodes.length > 0) box.appendChild(controlsRow);
         container.appendChild(box);
       });
     }
@@ -680,10 +744,10 @@
 
         const timeSpan = document.createElement("span");
         timeSpan.className = "small-note";
-        timeSpan.textContent = `[${m.ts}] `;
+        timeSpan.textContent = `[${formatTs(m.created_at)}] `;
 
         const nickSpan = document.createElement("span");
-        nickSpan.className = m.isSys ? "sys-nick" : "nick";
+        nickSpan.className = m.is_sys ? "sys-nick" : "nick";
         nickSpan.textContent = `${m.nick}: `;
 
         const textSpan = document.createElement("span");
@@ -698,6 +762,10 @@
     function renderReports() {
       const feed = document.getElementById("reportsFeed");
       feed.innerHTML = "";
+      if (state.reports.length === 0) {
+        feed.innerHTML = `<div class="small-note">No disputes filed yet.</div>`;
+        return;
+      }
       state.reports.forEach((r) => {
         const div = document.createElement("div");
         div.className = "msg";
@@ -709,11 +777,10 @@
 
         const target = document.createElement("strong");
         target.textContent = `Target: ${r.target}`;
-
         header.append(badge, target);
 
         const body = document.createElement("div");
-        body.textContent = `${r.details} (${r.ts})`;
+        body.textContent = `${r.details} (${formatTs(r.created_at)})`;
 
         div.append(header, body);
         feed.appendChild(div);
@@ -723,150 +790,211 @@
 
     function renderAll() {
       renderWalletHeader();
+      renderAdminRoster();
       renderLeaderboard();
       renderListings();
       renderChat();
       renderReports();
     }
 
-    // =========================================================================
-    // EVENT HANDLERS
-    // =========================================================================
-    document.getElementById("adminToggleBtn").addEventListener("click", () => {
+    document.getElementById("authForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rawUsername = document.getElementById("authAliasInput").value.trim();
+      const lowerHandle = rawUsername.toLowerCase();
+      const pass = document.getElementById("authPassInput").value;
+
+      if (isReservedAdminHandle(lowerHandle)) {
+        alert("Username 'r4ven' is reserved. Use [SYS-ADMIN: r4ven] in the header.");
+        return;
+      }
+
+      if (!isValidAlphanumericPass(pass)) {
+        alert("Password must be at least 6 characters and include both letters and numbers.");
+        return;
+      }
+
+      const passHash = await hashPassword(lowerHandle, pass);
+      const { data, error } = await db.rpc("auth_operative", {
+        p_username: rawUsername,
+        p_password_hash: passHash
+      });
+
+      if (error) return alert(error.message);
+
+      sessionAdminPin = "";
+      document.getElementById("adminPanel").classList.remove("open");
+      currentHandle = lowerHandle;
+      currentDisplayName = data && data[0] ? data[0].display_name : rawUsername;
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ handle: lowerHandle, displayName: currentDisplayName, passHash }));
+      document.getElementById("authPassInput").value = "";
+      await refreshAllFromDB();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      currentHandle = null;
+      currentDisplayName = null;
+      sessionAdminPin = "";
+      localStorage.removeItem(SESSION_KEY);
+      document.getElementById("adminPanel").classList.remove("open");
+      renderAll();
+    });
+
+    document.getElementById("adminToggleBtn").addEventListener("click", async () => {
       const panel = document.getElementById("adminPanel");
-      if (adminUnlocked && panel.classList.contains("open")) {
+      if (isAdminUnlocked() && panel.classList.contains("open")) {
         panel.classList.remove("open");
         return;
       }
-      const pin = prompt("Enter Sys-Admin (r4ven) Vault PIN:");
-      if (pin === ADMIN_PIN) {
-        adminUnlocked = true;
-        currentAlias = SYS_ADMIN_HANDLE;
-        localStorage.setItem(ALIAS_KEY, currentAlias);
-        ensureWallet(currentAlias);
+      const pin = prompt("Enter Sys-Admin (r4ven) PIN:");
+      if (!pin) return;
+
+      const { error } = await db.rpc("r4ven_treasury", {
+        p_pin: pin,
+        p_target: "r4ven",
+        p_delta: 0,
+        p_tier: "SYS-ADMIN SOVEREIGN"
+      });
+
+      if (error) {
+        alert("ACCESS DENIED.");
+      } else {
+        sessionAdminPin = pin;
+        currentHandle = SYS_ADMIN_HANDLE;
+        currentDisplayName = SYS_ADMIN_HANDLE;
+        localStorage.removeItem(SESSION_KEY);
         panel.classList.add("open");
-        renderAll();
-      } else if (pin !== null) {
-        alert("ACCESS DENIED. Only r4ven holds the keys.");
+        await refreshAllFromDB();
       }
     });
 
-    document.getElementById("adminTreasuryForm").addEventListener("submit", (e) => {
+    document.getElementById("adminTreasuryForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (!adminUnlocked || currentAlias !== SYS_ADMIN_HANDLE) {
-        alert("Sys-Admin authentication required.");
-        return;
-      }
+      if (!isAdminUnlocked()) return;
+
       const rawTarget = escapeClean(document.getElementById("targetOperative").value).toLowerCase();
       if (!rawTarget) return;
 
       const presetRaw = document.getElementById("friendshipPreset").value.split("|");
       const customDeltaRaw = document.getElementById("customBtcDelta").value;
-
       const delta = customDeltaRaw !== "" ? Number(customDeltaRaw) : Number(presetRaw[1]);
-      if (!Number.isFinite(delta)) {
-        alert("Enter a valid BTC adjustment number.");
-        return;
-      }
+      if (!Number.isFinite(delta)) return alert("Invalid BTC amount.");
 
-      const wallet = ensureWallet(rawTarget);
-      const nextBalance = clampBtc(wallet.btc + delta);
-      wallet.btc = nextBalance;
+      const tier = customDeltaRaw !== ""
+        ? (delta >= 0 ? "FAVORED OPERATIVE" : "SUSPECT OPERATIVE")
+        : presetRaw[2];
 
-      if (rawTarget === SYS_ADMIN_HANDLE) {
-        wallet.tier = "SYS-ADMIN SOVEREIGN";
-      } else {
-        wallet.tier = customDeltaRaw !== ""
-          ? (delta >= 0 ? "FAVORED OPERATIVE" : "SUSPECT OPERATIVE")
-          : presetRaw[2];
-      }
-
-      const actionWord = delta >= 0 ? `minted/granted +${formatBtc(delta)} BTC to` : `seized ${formatBtc(Math.abs(delta))} BTC from`;
-      state.messages.push({
-        nick: SYS_ADMIN_HANDLE,
-        text: `DECREE: r4ven ${actionWord} [${rawTarget}]. Balance: ${formatBtc(wallet.btc)} BTC [${wallet.tier}].`,
-        ts: nowTime(),
-        isSys: true
+      const { error } = await db.rpc("r4ven_treasury", {
+        p_pin: sessionAdminPin,
+        p_target: rawTarget,
+        p_delta: delta,
+        p_tier: tier
       });
 
-      document.getElementById("customBtcDelta").value = "";
-      saveState(state);
-    });
-
-    document.getElementById("setAliasBtn").addEventListener("click", () => {
-      const nextAlias = escapeClean(document.getElementById("activeAliasInput").value);
-      if (!nextAlias) return;
-
-      if (isReservedAdminHandle(nextAlias) && !adminUnlocked) {
-        alert("Nice try. 'r4ven' is locked to the Sys-Admin and cannot be claimed.");
-        document.getElementById("activeAliasInput").value = currentAlias;
-        state.messages.push({
-          nick: "SECURITY_DAEMON",
-          text: `ALERT: ${currentAlias} tried to impersonate Sys-Admin 'r4ven'. Blocked.`,
-          ts: nowTime(),
-          isSys: true
-        });
-        saveState(state);
-        return;
+      if (error) alert(error.message);
+      else {
+        document.getElementById("customBtcDelta").value = "";
+        await refreshAllFromDB();
       }
-
-      currentAlias = isReservedAdminHandle(nextAlias) ? SYS_ADMIN_HANDLE : nextAlias;
-      localStorage.setItem(ALIAS_KEY, currentAlias);
-      ensureWallet(currentAlias);
-      saveState(state);
     });
 
-    document.getElementById("newListingForm").addEventListener("submit", (e) => {
+    document.getElementById("adminModifyUserForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
-        currentAlias = "anon_operative";
+      if (!isAdminUnlocked()) return;
+
+      const target = escapeClean(document.getElementById("modUsername").value).toLowerCase();
+      const exactBtc = Number(document.getElementById("modExactBtc").value);
+      const newTier = escapeClean(document.getElementById("modTier").value);
+      const newPass = document.getElementById("modNewPassword").value.trim();
+
+      if (!target || !Number.isFinite(exactBtc) || !newTier) return;
+
+      let newPassHash = "";
+      if (newPass.length > 0) {
+        if (!isValidAlphanumericPass(newPass)) {
+          return alert("New password must be 6+ chars with both letters and numbers.");
+        }
+        newPassHash = await hashPassword(target, newPass);
       }
+
+      const { error } = await db.rpc("r4ven_modify_user", {
+        p_pin: sessionAdminPin,
+        p_target: target,
+        p_new_btc: exactBtc,
+        p_new_tier: newTier,
+        p_new_password_hash: newPassHash
+      });
+
+      if (error) alert(error.message);
+      else {
+        document.getElementById("modNewPassword").value = "";
+        await refreshAllFromDB();
+      }
+    });
+
+    document.getElementById("newListingForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentHandle) return alert("Log in with your username & password first.");
+
       const title = escapeClean(document.getElementById("itemTitle").value);
-      const rawStartBid = Number(document.getElementById("startBid").value) || 0.001;
-      const startBid = clampBtc(Math.max(0.0001, rawStartBid));
+      const startBid = clampBtc(Math.max(0.0001, Number(document.getElementById("startBid").value) || 0.001));
       const desc = escapeClean(document.getElementById("itemDesc").value);
       if (!title || !desc) return;
 
       const id = `HWY-${Math.floor(100 + Math.random() * 900)}`;
-      state.listings.unshift({
-        id,
-        title,
-        desc,
-        vendor: currentAlias,
-        highestBid: startBid,
-        highestBidder: "None yet",
-        isClosed: false
-      });
-      state.messages.push({
-        nick: "HIGHWAY_INDEX",
-        text: `New listing [${id}] "${title}" by ${currentAlias} starting at ${formatBtc(startBid)} BTC.`,
-        ts: nowTime(),
-        isSys: true
-      });
+
+      if (isAdminUnlocked()) {
+        const { error } = await db.rpc("r4ven_create_listing", {
+          p_pin: sessionAdminPin,
+          p_id: id,
+          p_title: title,
+          p_desc: desc,
+          p_start_bid: startBid
+        });
+        if (error) return alert(error.message);
+      } else {
+        const { error } = await db.from("listings").insert({
+          id,
+          title,
+          description: desc,
+          vendor: currentHandle,
+          highest_bid: startBid
+        });
+        if (error) return alert(error.message);
+        await db.from("messages").insert({
+          nick: "HIGHWAY_INDEX",
+          text: `New listing [${id}] "${title}" by ${currentDisplayName || currentHandle} starting at ${formatBtc(startBid)} BTC.`,
+          is_sys: false
+        });
+      }
+
       e.target.reset();
-      saveState(state);
+      await refreshAllFromDB();
     });
 
-    document.getElementById("chatForm").addEventListener("submit", (e) => {
+    document.getElementById("chatForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (isReservedAdminHandle(currentAlias) && !adminUnlocked) {
-        currentAlias = "anon_operative";
-      }
+      if (!currentHandle) return alert("Log in with your username & password first.");
+
       const text = escapeClean(document.getElementById("chatText").value);
       if (!text) return;
 
-      ensureWallet(currentAlias);
-      state.messages.push({
-        nick: currentAlias,
-        text,
-        ts: nowTime(),
-        isSys: isReservedAdminHandle(currentAlias) && adminUnlocked
-      });
+      if (isAdminUnlocked()) {
+        const { error } = await db.rpc("r4ven_post_message", { p_pin: sessionAdminPin, p_text: text });
+        if (error) return alert(error.message);
+      } else {
+        const { error } = await db.from("messages").insert({
+          nick: currentDisplayName || currentHandle,
+          text,
+          is_sys: false
+        });
+        if (error) return alert(error.message);
+      }
+
       document.getElementById("chatText").value = "";
-      saveState(state);
+      await refreshAllFromDB();
     });
 
-    document.getElementById("reportForm").addEventListener("submit", (e) => {
+    document.getElementById("reportForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const target = escapeClean(document.getElementById("reportTarget").value);
       const reason = escapeClean(document.getElementById("reportReason").value);
@@ -874,24 +1002,38 @@
       if (!target || !details) return;
 
       const id = `RPT-${Math.floor(10 + Math.random() * 90)}`;
-      state.reports.push({ id, target, reason, details, ts: nowTime() });
-      state.messages.push({
+      const { error } = await db.from("reports").insert({ id, target, reason, details });
+      if (error) return alert(error.message);
+
+      await db.from("messages").insert({
         nick: "SNITCH_DESK",
         text: `Report ${id} filed against ${target} (${reason}). r4ven notified.`,
-        ts: nowTime(),
-        isSys: true
+        is_sys: false
       });
+
       e.target.reset();
-      saveState(state);
+      await refreshAllFromDB();
     });
 
-    document.getElementById("resetDemoBtn").addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      state = loadState();
-      renderAll();
-    });
-
-    renderAll();
+    (async () => {
+      await refreshAllFromDB();
+      try {
+        const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+        if (saved?.handle && saved?.passHash && !isReservedAdminHandle(saved.handle)) {
+          const { data, error } = await db.rpc("auth_operative", {
+            p_username: saved.displayName || saved.handle,
+            p_password_hash: saved.passHash
+          });
+          if (!error && data && data.length > 0) {
+            currentHandle = data[0].handle;
+            currentDisplayName = data[0].display_name;
+            renderWalletHeader();
+          } else {
+            localStorage.removeItem(SESSION_KEY);
+          }
+        }
+      } catch {}
+    })();
   </script>
 </body>
 </html>
