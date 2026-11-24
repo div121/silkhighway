@@ -1,2 +1,2 @@
-# schoolnews
+# silkhighway
 my website config
