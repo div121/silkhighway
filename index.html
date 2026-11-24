@@ -1,610 +1,708 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loyola News </title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #18181b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SILK HIGHWAY // Satirical Darknet Sandbox</title>
+  <style>
+    :root {
+      --bg: #070908;
+      --panel: #0d120f;
+      --panel-2: #121915;
+      --border: #1e2d24;
+      --text: #d7e5dc;
+      --muted: #7c9486;
+      --accent: #22e584;
+      --btc: #f7931a;
+      --warn: #f5b700;
+      --danger: #ff4d5a;
+      --mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      line-height: 1.5;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: #0a0e0c;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      font-size: 16px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .onion-tag {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 5px 9px;
+      border-radius: 4px;
+    }
+
+    .wallet-pill {
+      font-size: 12px;
+      background: rgba(247, 147, 26, 0.1);
+      border: 1px solid rgba(247, 147, 26, 0.4);
+      color: var(--btc);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .banner {
+      background: rgba(245, 183, 0, 0.08);
+      border-bottom: 1px solid rgba(245, 183, 0, 0.3);
+      color: var(--warn);
+      font-size: 12px;
+      padding: 8px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .admin-card {
+      border-color: var(--btc);
+      background: #14110b;
+      display: none;
+    }
+
+    .admin-card.open { display: block; }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-card h2 { color: var(--btc); }
+
+    .listing {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .listing-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .listing-title {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .bid-price {
+      color: var(--btc);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 6px 0 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    input, select, textarea, button {
+      font-family: var(--mono);
+      font-size: 13px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    input, select, textarea {
+      background: var(--bg);
+      color: var(--text);
+      padding: 8px 10px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      background: var(--accent);
+      color: #05110a;
+      font-weight: 700;
+      padding: 8px 12px;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover { filter: brightness(1.08); }
+
+    button.btc-btn {
+      background: var(--btc);
+      color: #140b00;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    button.secondary {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .feed {
+      max-height: 230px;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .msg {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .msg:last-child { border-bottom: none; }
+    .nick { color: var(--accent); font-weight: 700; }
+    .sys-nick { color: var(--btc); font-weight: 700; }
+    .report-badge { color: var(--danger); font-weight: 700; }
+    .small-note { font-size: 11px; color: var(--muted); }
+  </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen flex flex-col antialiased">
-
-    <!-- NAVIGATION HEADER -->
-    <header class="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur sticky top-0 z-30">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-            
-            <!-- Branding (Lightning Icon Removed) -->
-            <div class="flex flex-col">
-                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                    Loyola News and student blogs
-                </h1>
-                <p class="text-xs text-zinc-400 font-medium">All the affairs, here</p>
-            </div>
-
-            <!-- Header Controls: Admin Toggle & New Post Button -->
-            <div class="flex items-center gap-3">
-                <button id="adminToggleBtn" onclick="toggleAdminModal()" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition flex items-center gap-2">
-                    <i class="fa-solid fa-lock text-zinc-400" id="adminLockIcon"></i>
-                    <span id="adminBtnText">Sys-Admin Locked</span>
-                </button>
-
-                <button onclick="openCreatePostModal()" class="px-4 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-lg shadow-emerald-900/30 flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> New Post
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
-        
-        <!-- TABS & SEARCH / FILTER BAR -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-800">
-            
-            <!-- Tab Switching -->
-            <div class="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 self-start">
-                <button id="tabOfficialBtn" onclick="switchTab('official')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all text-white bg-zinc-800 shadow">
-                    <i class="fa-solid fa-bullhorn mr-1.5 text-emerald-400"></i> Official News
-                </button>
-                <button id="tabStudentBtn" onclick="switchTab('student')" class="px-4 py-2 text-xs font-bold rounded-lg transition-all text-zinc-400 hover:text-white">
-                    <i class="fa-solid fa-user-pen mr-1.5 text-emerald-400"></i> Student Blogs
-                </button>
-            </div>
-
-            <!-- Search & Admin Status Badge -->
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <div class="relative w-full md:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
-                    <input type="text" id="searchInput" oninput="renderPosts()" placeholder="Search posts..." class="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500 transition">
-                </div>
-                <button onclick="exportData()" title="Backup Posts Data" class="p-2 text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 rounded-lg text-xs">
-                    <i class="fa-solid fa-download"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- ADMIN MODE INDICATOR BANNER -->
-        <div id="adminBanner" class="hidden mb-6 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-xs flex items-center justify-between">
-            <span class="flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved"></i> <strong>Sys-Admin Mode Active:</strong> You have authorization to publish Official News and delete posts.
-            </span>
-            <button onclick="logoutAdmin()" class="underline hover:text-amber-300 font-bold">Lock Admin</button>
-        </div>
-
-        <!-- FEED LIST VIEW -->
-        <div id="feedView">
-            <div id="postsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- Posts dynamic insertion -->
-            </div>
-            
-            <div id="emptyState" class="hidden text-center py-16">
-                <i class="fa-regular fa-folder-open text-4xl text-zinc-600 mb-3 block"></i>
-                <p class="text-zinc-400 text-sm font-medium">No posts found in this section.</p>
-            </div>
-        </div>
-
-        <!-- DETAILED SINGLE POST VIEW -->
-        <div id="detailView" class="hidden max-w-3xl mx-auto bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 md:p-8 backdrop-blur-sm">
-            <button onclick="closeDetailView()" class="mb-6 px-4 py-2 text-xs font-semibold rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> ← Back to Feed
-            </button>
-
-            <div id="detailContent">
-                <!-- Dynamic post detailed content will go here -->
-            </div>
-        </div>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="border-t border-zinc-800 py-6 text-center text-xs text-zinc-500 mt-12">
-        <p>Loyola News & Student Blogs &bull; Built with HTML & Tailwind CSS</p>
-    </footer>
-
-    <!-- SYS-ADMIN MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
-            <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-user-shield text-emerald-500"></i> Sys-Admin Authentication
-            </h3>
-            <p class="text-xs text-zinc-400 mb-4">Enter the administrative passcode to access restricted delete features and official news publishing.</p>
-            
-            <form onsubmit="handleAdminAuth(event)">
-                <input type="password" id="adminPasscode" placeholder="Enter Sys-Admin Passcode" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-200 mb-4 focus:outline-none focus:border-emerald-500">
-                <div id="adminAuthError" class="text-rose-500 text-xs mb-3 hidden">Incorrect Passcode. Try again.</div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="toggleAdminModal()" class="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg">Unlock Admin Mode</button>
-                </div>
-            </form>
-        </div>
+<body>
+  <header>
+    <div>
+      <span class="brand">// SILK HIGHWAY v0.2</span>
+      <div class="small-note">Underground Satire Network // Escrow & Friendship Ledger</div>
     </div>
-
-    <!-- CREATE POST MODAL -->
-    <div id="createPostModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-white" id="modalTitle">Create Student Post</h3>
-                <button onclick="closeCreatePostModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <form onsubmit="handleCreatePost(event)" class="space-y-4">
-                
-                <div id="officialPostNotice" class="hidden p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl text-emerald-300 text-xs">
-                    <i class="fa-solid fa-circle-check mr-1"></i> You are publishing an <strong>Official News</strong> post as Sys-Admin.
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-zinc-300 mb-1">Post Title *</label>
-                    <input type="text" id="postTitle" required placeholder="e.g., Campus Library Hours Extended" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-zinc-300 mb-1">Author / Handle *</label>
-                        <input type="text" id="postAuthor" required placeholder="e.g., Alex (Junior)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-zinc-300 mb-1">Category Tag</label>
-                        <input type="text" id="postTag" placeholder="e.g., Academics, Sports, Event" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-zinc-300 mb-1">Image Attachment (Optional)</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="url" id="postImageUrl" placeholder="Paste Image URL..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-zinc-200 focus:outline-none focus:border-emerald-500">
-                        <div class="text-center text-xs text-zinc-500 font-semibold my-0.5">OR UPLOAD FILE</div>
-                        <input type="file" id="postImageFile" accept="image/*" class="text-xs text-zinc-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-zinc-300 mb-1">Content Body *</label>
-                    <textarea id="postContent" required rows="5" placeholder="Write your full post content here..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500"></textarea>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="closeCreatePostModal()" class="px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white">Cancel</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-900/20">Publish Post</button>
-                </div>
-            </form>
-        </div>
+    <div class="header-right">
+      <div class="wallet-pill" id="walletDisplay">WALLET: 0.0050 BTC [TIER: ACQUAINTANCE]</div>
+      <div class="onion-tag">http://silkhighway9x4v2.onion</div>
+      <button type="button" class="secondary" id="adminToggleBtn">[SYS-ADMIN]</button>
     </div>
+  </header>
 
-    <!-- MAIN JAVASCRIPT LOGIC -->
-    <script>
-        // CONFIG & CONSTANTS
-        const PASSCODE = 'admin@schoolnews1234';
-        const STORAGE_KEY = 'loyola_news_posts_v1';
-        const LIKES_STORAGE_KEY = 'loyola_news_user_likes';
+  <div class="banner">
+    [PARODY SANDBOX] All Bitcoin (BTC) balances are fake monopoly money controlled exclusively by the Sys-Admin's mood and current friendship status.
+  </div>
 
-        // DEFAULT DATA
-        const defaultPosts = [
-            {
-                id: '1',
-                type: 'official',
-                title: 'New Student Center Renovation Completed',
-                author: 'Administration',
-                date: '2026-10-12',
-                tag: 'Campus Updates',
-                content: 'We are thrilled to announce that the renovation of the Loyola Student Center is officially complete! The upgraded lounge area features modern study pods, expanded seating, high-speed Wi-Fi access points, and an updated café bar serving local artisan coffee. All students are invited to the official opening ceremony on Friday at 10:00 AM.',
-                imageUrl: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=800&q=80',
-                likes: 42
-            },
-            {
-                id: '2',
-                type: 'official',
-                title: 'Midterm Examination Schedule Released',
-                author: 'Academic Office',
-                date: '2026-10-10',
-                tag: 'Academics',
-                content: 'The official timetable for the upcoming midterm examinations is now published on the student portal. Please check your personalized dashboard for subject timings and hall allocations. Any timetable clashes should be reported to the registrar office before the end of the week.',
-                imageUrl: '',
-                likes: 18
-            },
-            {
-                id: '3',
-                type: 'student',
-                title: 'Top 5 Quietest Study Spots on Campus During Finals',
-                author: 'Maya S. (Computer Science)',
-                date: '2026-10-14',
-                tag: 'Student Life',
-                content: 'Finding a quiet place to study during finals week can be super stressful. Here is my personal list of underrated, quiet places to focus without distraction:\n\n1. Science Wing 3rd Floor Nook\n2. The Library Basement Archives Corner\n3. Arts Building Courtyard (when sunny)\n4. Engineering Building Mezzanine\n5. The Old Chapel Reading Room.',
-                imageUrl: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80',
-                likes: 31
-            }
-        ];
+  <main class="container">
+    <!-- LEFT COLUMN: AUCTIONS & NEW LISTING -->
+    <section>
+      <!-- HIDDEN SYS-ADMIN VAULT -->
+      <div class="card admin-card" id="adminPanel">
+        <h2>// SYS-ADMIN TREASURY & FRIENDSHIP TRIBUNAL</h2>
+        <div class="small-note" style="margin-bottom:10px;">
+          Grant or seize Bitcoin from any operative based on current friendship status.
+        </div>
+        <form id="adminTreasuryForm">
+          <div class="row">
+            <input id="targetOperative" placeholder="Operative Codename" required style="flex:1; min-width:140px;" />
+            <select id="friendshipPreset">
+              <option value="Day-One Homie (+2.5000 BTC)|2.5|DAY-ONE HOMIE">Day-One Homie (+2.5000 BTC)</option>
+              <option value="Sent Good Memes (+0.5000 BTC)|0.5|MEME DEALER">Sent Good Memes (+0.5000 BTC)</option>
+              <option value="Left Me On Read (-0.2500 BTC)|-0.25|ON THIN ICE">Left Me On Read (-0.2500 BTC)</option>
+              <option value="Snitched / Betrayal (-5.0000 BTC)|-5.0|EXCOMMUNICATED">Snitched / Betrayal (-5.0000 BTC)</option>
+            </select>
+          </div>
+          <div class="row">
+            <input id="customBtcDelta" type="number" step="0.0001" placeholder="Or custom +/- BTC (e.g. 1.25 or -0.5)" style="flex:1;" />
+            <button type="submit" class="btc-btn">Execute Treasury Decree</button>
+          </div>
+        </form>
+        <div id="ledgerPreview" class="small-note" style="margin-top:10px;"></div>
+      </div>
 
-        // STATE MANAGEMENT
-        let currentTab = 'official'; // 'official' | 'student'
-        let isAdmin = false;
-        let posts = [];
-        let userLikedPostIds = [];
+      <div class="card">
+        <h2>Live Auctions & Parody Contracts</h2>
+        <div id="listingsContainer"></div>
+      </div>
 
-        // INITIALIZATION
-        window.addEventListener('DOMContentLoaded', () => {
-            loadPosts();
-            loadLikedState();
-            renderPosts();
-        });
+      <div class="card">
+        <h2>List New Contraband / Consultation</h2>
+        <form id="newListingForm">
+          <div class="row">
+            <input id="itemTitle" placeholder="Item / 'Target' (e.g. Wi-Fi Password of Neighbor's Toaster)" required style="flex:2; min-width:180px;" />
+            <input id="startBid" type="number" step="0.0001" min="0.0001" value="0.0020" placeholder="Start BTC" required style="width:120px;" />
+          </div>
+          <div class="row">
+            <input id="vendorName" placeholder="Your Codename" required style="flex:1; min-width:140px;" />
+            <input id="itemDesc" placeholder="Joke pitch / escrow rules..." required style="flex:2; min-width:180px;" />
+          </div>
+          <div class="row">
+            <button type="submit">Publish to Highway</button>
+          </div>
+        </form>
+      </div>
+    </section>
 
-        function loadPosts() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try { posts = JSON.parse(saved); } catch(e) { posts = defaultPosts; }
-            } else {
-                posts = defaultPosts;
-                savePosts();
-            }
+    <!-- RIGHT COLUMN: COMMS CHAT & REPORT DESK -->
+    <aside>
+      <div class="card">
+        <h2>Active Operative Identity</h2>
+        <div class="row">
+          <input id="activeAliasInput" placeholder="Set your codename..." style="flex:1;" />
+          <button type="button" class="secondary" id="setAliasBtn">Lock Alias</button>
+        </div>
+        <div class="small-note" style="margin-top:6px;">
+          Your wallet & friendship tier are tied to this codename. Beg the Sys-Admin in chat for more BTC.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Encrypted Comms (Chatter)</h2>
+        <div id="chatFeed" class="feed"></div>
+        <form id="chatForm">
+          <div class="row">
+            <input id="chatText" placeholder="Beg for BTC or talk smack..." required style="flex:1; min-width:140px;" />
+            <button type="submit">Send</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Dispute & Snitch Report Desk</h2>
+        <div id="reportsFeed" class="feed"></div>
+        <form id="reportForm">
+          <div class="row">
+            <input id="reportTarget" placeholder="Suspect / Listing ID" required style="flex:1; min-width:130px;" />
+            <select id="reportReason">
+              <option value="Fake Friendship / Clout Chasing">Fake Friendship / Clout Chasing</option>
+              <option value="Script Kiddie Alert">Script Kiddie Alert</option>
+              <option value="Fake Zero-Day">Fake Zero-Day</option>
+              <option value="Broke Wallet Energy">Broke Wallet Energy</option>
+            </select>
+          </div>
+          <div class="row">
+            <textarea id="reportDetails" rows="2" placeholder="Snitch on them to the Sys-Admin..." required style="width:100%;"></textarea>
+          </div>
+          <div class="row">
+            <button type="submit" class="danger">File Report</button>
+            <button type="button" id="resetDemoBtn" class="secondary">Reset Trial Data</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // =========================================================================
+    // CONFIG & STORAGE ADAPTER (Ready to swap for Supabase later)
+    // =========================================================================
+    const ADMIN_PIN = "1337"; // Change this to your secret Sys-Admin PIN!
+    const STORAGE_KEY = "silk_highway_trial_v1";
+    const ALIAS_KEY = "silk_highway_my_alias";
+    const channel = new BroadcastChannel("silk_highway_channel");
+
+    const SEED_STATE = {
+      wallets: {
+        "sys_admin": { btc: 999.0000, tier: "SUPREME OVERLORD" },
+        "phantom_ping": { btc: 0.0500, tier: "CHILL ACQUAINTANCE" },
+        "zero_coolish": { btc: 0.0010, tier: "ON THIN ICE" }
+      },
+      listings: [
+        {
+          id: "HWY-101",
+          title: "Firewall Rule #404: 'Please Don't Hack Me'",
+          desc: "Enterprise security policy written at 3 AM. Escrow required.",
+          vendor: "null_byte_99",
+          highestBid: 0.0025,
+          highestBidder: "phantom_ping"
+        },
+        {
+          id: "HWY-102",
+          title: "1x Slightly Used Rubber Ducky (Debugging Edition)",
+          desc: "Quacks softly when your code segfaults. Only serious BTC offers.",
+          vendor: "root_beer",
+          highestBid: 0.0150,
+          highestBidder: "zero_coolish"
         }
+      ],
+      messages: [
+        { nick: "SYS_ADMIN", text: "Silk Highway is online. Keep the memes good if you want your BTC allowance.", ts: "03:14", isSys: true },
+        { nick: "phantom_ping", text: "Yo sys_admin lend me 0.5 BTC, I swear I'm your best friend.", ts: "03:16", isSys: false }
+      ],
+      reports: [
+        { id: "RPT-01", target: "zero_coolish", reason: "Broke Wallet Energy", details: "Tried to bid 0.05 BTC with 0.0010 in the vault.", ts: "03:12" }
+      ]
+    };
 
-        function savePosts() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-        }
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_STATE));
+        return structuredClone(SEED_STATE);
+      }
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return structuredClone(SEED_STATE);
+      }
+    }
 
-        function loadLikedState() {
-            const savedLikes = localStorage.getItem(LIKES_STORAGE_KEY);
-            if (savedLikes) {
-                try { userLikedPostIds = JSON.parse(savedLikes); } catch(e) { userLikedPostIds = []; }
-            }
-        }
+    function saveState(nextState) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+      channel.postMessage({ type: "STATE_UPDATED" });
+      renderAll();
+    }
 
-        function saveLikedState() {
-            localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(userLikedPostIds));
-        }
+    let state = loadState();
+    let currentAlias = localStorage.getItem(ALIAS_KEY) || "anon_operative";
 
-        // TAB NAVIGATION
-        function switchTab(tab) {
-            currentTab = tab;
-            const officialBtn = document.getElementById('tabOfficialBtn');
-            const studentBtn = document.getElementById('tabStudentBtn');
+    function ensureWallet(alias) {
+      const key = alias.toLowerCase();
+      if (!state.wallets[key]) {
+        state.wallets[key] = { btc: 0.0050, tier: "UNVERIFIED RANDOM" };
+      }
+      return state.wallets[key];
+    }
 
-            if (tab === 'official') {
-                officialBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-white bg-zinc-800 shadow";
-                studentBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-zinc-400 hover:text-white";
-            } else {
-                studentBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-white bg-zinc-800 shadow";
-                officialBtn.className = "px-4 py-2 text-xs font-bold rounded-lg transition-all text-zinc-400 hover:text-white";
-            }
+    channel.onmessage = (event) => {
+      if (event.data?.type === "STATE_UPDATED") {
+        state = loadState();
+        renderAll();
+      }
+    };
 
-            closeDetailView();
-            renderPosts();
-        }
+    // =========================================================================
+    // HELPERS & RENDERERS
+    // =========================================================================
+    function nowTime() {
+      return new Date().toTimeString().slice(0, 5);
+    }
 
-        // RENDER POSTS FEED
-        function renderPosts() {
-            const grid = document.getElementById('postsGrid');
-            const emptyState = document.getElementById('emptyState');
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    function escapeClean(str) {
+      return String(str).trim().slice(0, 220);
+    }
 
-            grid.innerHTML = '';
+    function formatBtc(num) {
+      return Number(num).toFixed(4);
+    }
 
-            const filteredPosts = posts.filter(post => {
-                const matchesTab = post.type === currentTab;
-                const matchesSearch = post.title.toLowerCase().includes(searchQuery) ||
-                                      post.content.toLowerCase().includes(searchQuery) ||
-                                      post.author.toLowerCase().includes(searchQuery) ||
-                                      (post.tag && post.tag.toLowerCase().includes(searchQuery));
-                return matchesTab && matchesSearch;
-            });
+    function renderWalletHeader() {
+      const wallet = ensureWallet(currentAlias);
+      const display = document.getElementById("walletDisplay");
+      display.textContent = `${currentAlias}: ${formatBtc(wallet.btc)} BTC [${wallet.tier}]`;
+      document.getElementById("activeAliasInput").value = currentAlias;
 
-            if (filteredPosts.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            } else {
-                emptyState.classList.add('hidden');
-            }
+      // Update admin ledger preview
+      const preview = document.getElementById("ledgerPreview");
+      const entries = Object.entries(state.wallets)
+        .map(([name, w]) => `${name}: ${formatBtc(w.btc)} BTC (${w.tier})`)
+        .join(" | ");
+      preview.textContent = `Active Ledger: ${entries}`;
+    }
 
-            filteredPosts.forEach(post => {
-                const isLiked = userLikedPostIds.includes(post.id);
-                const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-zinc-700 transition flex flex-col justify-between group shadow-lg";
+    function renderListings() {
+      const container = document.getElementById("listingsContainer");
+      container.innerHTML = "";
 
-                const imageHtml = post.imageUrl 
-                    ? `<div class="h-44 w-full overflow-hidden bg-zinc-950 cursor-pointer" onclick="openDetailView('${post.id}')">
-                         <img src="${post.imageUrl}" alt="Post image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.style.display='none'">
-                       </div>`
-                    : '';
+      state.listings.forEach((item) => {
+        const box = document.createElement("div");
+        box.className = "listing";
 
-                // Delete button STRICTLY rendered ONLY when isAdmin is true
-                const deleteButtonHtml = isAdmin 
-                    ? `<button onclick="deletePost('${post.id}', event)" title="Delete Post (Sys-Admin)" class="text-zinc-500 hover:text-rose-400 p-1.5 transition">
-                         <i class="fa-solid fa-trash-can"></i>
-                       </button>` 
-                    : '';
+        const top = document.createElement("div");
+        top.className = "listing-top";
 
-                card.innerHTML = `
-                    <div>
-                        ${imageHtml}
-                        <div class="p-5">
-                            <div class="flex items-center justify-between text-xs text-zinc-400 mb-2">
-                                <span class="bg-zinc-800 text-emerald-400 px-2.5 py-0.5 rounded-full font-medium text-[10px]">
-                                    ${escapeHtml(post.tag || 'General')}
-                                </span>
-                                <span>${post.date}</span>
-                            </div>
-                            <h3 onclick="openDetailView('${post.id}')" class="text-base font-bold text-white mb-2 line-clamp-2 hover:text-emerald-400 cursor-pointer transition">
-                                ${escapeHtml(post.title)}
-                            </h3>
-                            <p onclick="openDetailView('${post.id}')" class="text-xs text-zinc-400 line-clamp-3 mb-4 cursor-pointer">
-                                ${escapeHtml(post.content)}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="px-5 pb-5 pt-0 flex items-center justify-between border-t border-zinc-800/50 mt-auto pt-3">
-                        <span class="text-xs text-zinc-500 font-medium truncate max-w-[140px]">By ${escapeHtml(post.author)}</span>
-                        <div class="flex items-center gap-2">
-                            <button onclick="toggleLike('${post.id}', event)" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${isLiked ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-400' : 'bg-zinc-800/60 border-zinc-700/50 text-zinc-400 hover:text-white'} transition text-xs">
-                                <i class="fa-solid fa-heart ${isLiked ? 'text-emerald-400' : ''}"></i>
-                                <span>${post.likes || 0}</span>
-                            </button>
-                            ${deleteButtonHtml}
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+        const title = document.createElement("span");
+        title.className = "listing-title";
+        title.textContent = `[${item.id}] ${item.title}`;
 
-        // SINGLE POST DETAILED VIEW MECHANISM
-        function openDetailView(postId) {
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
+        const bid = document.createElement("span");
+        bid.className = "bid-price";
+        bid.textContent = `${formatBtc(item.highestBid)} BTC`;
 
-            const detailView = document.getElementById('detailView');
-            const feedView = document.getElementById('feedView');
-            const detailContent = document.getElementById('detailContent');
+        top.append(title, bid);
 
-            const isLiked = userLikedPostIds.includes(post.id);
-            const deleteButtonHtml = isAdmin 
-                ? `<button onclick="deletePost('${post.id}', event)" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-900/40 border border-rose-800 text-rose-300 hover:bg-rose-900/80 transition flex items-center gap-1.5">
-                     <i class="fa-solid fa-trash-can"></i> Delete Post
-                   </button>` 
-                : '';
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = `Vendor: ${item.vendor} | Top Bidder: ${item.highestBidder || "None"} — ${item.desc}`;
 
-            const imageHtml = post.imageUrl 
-                ? `<div class="mb-6 rounded-xl overflow-hidden border border-zinc-800 max-h-96 w-full">
-                     <img src="${post.imageUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-                   </div>`
-                : '';
+        const bidRow = document.createElement("div");
+        bidRow.className = "row";
 
-            detailContent.innerHTML = `
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <span class="bg-zinc-800 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold">
-                        ${escapeHtml(post.tag || 'General')}
-                    </span>
-                    <span class="text-xs text-zinc-500">${post.date}</span>
-                </div>
+        const amountInput = document.createElement("input");
+        amountInput.type = "number";
+        amountInput.step = "0.0001";
+        amountInput.min = formatBtc(item.highestBid + 0.0005);
+        amountInput.value = formatBtc(item.highestBid + 0.0010);
+        amountInput.style.width = "125px";
 
-                <h1 class="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight leading-snug">
-                    ${escapeHtml(post.title)}
-                </h1>
+        const bidBtn = document.createElement("button");
+        bidBtn.className = "btc-btn";
+        bidBtn.textContent = `Bid as ${currentAlias}`;
+        bidBtn.onclick = () => {
+          const wallet = ensureWallet(currentAlias);
+          const nextBid = Number(amountInput.value);
 
-                <div class="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
-                    <div class="text-xs text-zinc-400">
-                        Published by <strong class="text-zinc-200">${escapeHtml(post.author)}</strong>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleLike('${post.id}', event)" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border ${isLiked ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:text-white'} transition text-xs font-semibold">
-                            <i class="fa-solid fa-heart ${isLiked ? 'text-emerald-400' : ''}"></i>
-                            <span>${post.likes || 0} ${isLiked ? 'Liked' : 'Like'}</span>
-                        </button>
-                        ${deleteButtonHtml}
-                    </div>
-                </div>
+          if (!Number.isFinite(nextBid) || nextBid <= item.highestBid) {
+            alert(`Bid must be higher than ${formatBtc(item.highestBid)} BTC.`);
+            return;
+          }
+          if (wallet.btc < nextBid) {
+            alert(`INSUFFICIENT BITCOIN (${formatBtc(wallet.btc)} BTC). Go flatter the Sys-Admin in chat to boost your friendship tier!`);
+            return;
+          }
 
-                ${imageHtml}
+          wallet.btc = Math.max(0, Number((wallet.btc - nextBid).toFixed(4)));
+          item.highestBid = nextBid;
+          item.highestBidder = currentAlias;
 
-                <div class="text-zinc-300 text-sm leading-relaxed whitespace-pre-line font-normal space-y-4">
-                    ${escapeHtml(post.content)}
-                </div>
-            `;
+          state.messages.push({
+            nick: "ESCROW_BOT",
+            text: `${currentAlias} locked ${formatBtc(nextBid)} BTC on ${item.id} (${item.title}).`,
+            ts: nowTime(),
+            isSys: true
+          });
+          saveState(state);
+        };
 
-            feedView.classList.add('hidden');
-            detailView.classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        bidRow.append(amountInput, bidBtn);
+        box.append(top, meta, bidRow);
+        container.appendChild(box);
+      });
+    }
 
-        function closeDetailView() {
-            document.getElementById('detailView').classList.add('hidden');
-            document.getElementById('feedView').classList.remove('hidden');
-        }
+    function renderChat() {
+      const feed = document.getElementById("chatFeed");
+      feed.innerHTML = "";
+      state.messages.forEach((m) => {
+        const div = document.createElement("div");
+        div.className = "msg";
 
-        // ONE-LIKE-PER-SESSION/DEVICE RESTRICTION
-        function toggleLike(postId, event) {
-            if (event) event.stopPropagation();
-            
-            const post = posts.find(p => p.id === postId);
-            if (!post) return;
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "small-note";
+        timeSpan.textContent = `[${m.ts}] `;
 
-            const likedIndex = userLikedPostIds.indexOf(postId);
+        const nickSpan = document.createElement("span");
+        nickSpan.className = m.isSys ? "sys-nick" : "nick";
+        nickSpan.textContent = `${m.nick}: `;
 
-            if (likedIndex > -1) {
-                // Unlike if already liked
-                userLikedPostIds.splice(likedIndex, 1);
-                post.likes = Math.max(0, (post.likes || 1) - 1);
-            } else {
-                // Like once
-                userLikedPostIds.push(postId);
-                post.likes = (post.likes || 0) + 1;
-            }
+        const textSpan = document.createElement("span");
+        textSpan.textContent = m.text;
 
-            saveLikedState();
-            savePosts();
-            renderPosts();
+        div.append(timeSpan, nickSpan, textSpan);
+        feed.appendChild(div);
+      });
+      feed.scrollTop = feed.scrollHeight;
+    }
 
-            // Refresh detailed view if currently viewing it
-            if (!document.getElementById('detailView').classList.contains('hidden')) {
-                openDetailView(postId);
-            }
-        }
+    function renderReports() {
+      const feed = document.getElementById("reportsFeed");
+      feed.innerHTML = "";
+      state.reports.forEach((r) => {
+        const div = document.createElement("div");
+        div.className = "msg";
 
-        // SYS-ADMIN DELETION RESTRICTION
-        function deletePost(postId, event) {
-            if (event) event.stopPropagation();
+        const header = document.createElement("div");
+        const badge = document.createElement("span");
+        badge.className = "report-badge";
+        badge.textContent = `[${r.id} // ${r.reason}] `;
 
-            // Strict authorization check
-            if (!isAdmin) {
-                alert("Unauthorized: Only Sys-Admin can delete posts!");
-                return;
-            }
+        const target = document.createElement("strong");
+        target.textContent = `Target: ${r.target}`;
 
-            if (confirm("Are you sure you want to permanently delete this post?")) {
-                posts = posts.filter(p => p.id !== postId);
-                savePosts();
-                closeDetailView();
-                renderPosts();
-            }
-        }
+        header.append(badge, target);
 
-        // ADMIN AUTHENTICATION
-        function toggleAdminModal() {
-            const modal = document.getElementById('adminModal');
-            modal.classList.toggle('hidden');
-            document.getElementById('adminAuthError').classList.add('hidden');
-            document.getElementById('adminPasscode').value = '';
-        }
+        const body = document.createElement("div");
+        body.textContent = `${r.details} (${r.ts})`;
 
-        function handleAdminAuth(e) {
-            e.preventDefault();
-            const passcode = document.getElementById('adminPasscode').value;
+        div.append(header, body);
+        feed.appendChild(div);
+      });
+      feed.scrollTop = feed.scrollHeight;
+    }
 
-            if (passcode === PASSCODE) {
-                isAdmin = true;
-                document.getElementById('adminLockIcon').className = 'fa-solid fa-lock-open text-emerald-400';
-                document.getElementById('adminBtnText').innerText = 'Sys-Admin Active';
-                document.getElementById('adminBanner').classList.remove('hidden');
-                toggleAdminModal();
-                renderPosts();
-            } else {
-                document.getElementById('adminAuthError').classList.remove('hidden');
-            }
-        }
+    function renderAll() {
+      renderWalletHeader();
+      renderListings();
+      renderChat();
+      renderReports();
+    }
 
-        function logoutAdmin() {
-            isAdmin = false;
-            document.getElementById('adminLockIcon').className = 'fa-solid fa-lock text-zinc-400';
-            document.getElementById('adminBtnText').innerText = 'Sys-Admin Locked';
-            document.getElementById('adminBanner').classList.add('hidden');
-            renderPosts();
-        }
+    // =========================================================================
+    // EVENT HANDLERS
+    // =========================================================================
+    document.getElementById("adminToggleBtn").addEventListener("click", () => {
+      const panel = document.getElementById("adminPanel");
+      if (panel.classList.contains("open")) {
+        panel.classList.remove("open");
+        return;
+      }
+      const pin = prompt("Enter Sys-Admin Vault PIN:");
+      if (pin === ADMIN_PIN) {
+        panel.classList.add("open");
+      } else if (pin !== null) {
+        alert("ACCESS DENIED. Incident logged to Sys-Admin.");
+      }
+    });
 
-        // CREATE POST HANDLING
-        function openCreatePostModal() {
-            const modal = document.getElementById('createPostModal');
-            const notice = document.getElementById('officialPostNotice');
-            const modalTitle = document.getElementById('modalTitle');
+    document.getElementById("adminTreasuryForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const target = escapeClean(document.getElementById("targetOperative").value).toLowerCase();
+      if (!target) return;
 
-            if (isAdmin && currentTab === 'official') {
-                notice.classList.remove('hidden');
-                modalTitle.innerText = "Create Official News Post";
-            } else {
-                notice.classList.add('hidden');
-                modalTitle.innerText = "Create Student Post";
-            }
+      const presetRaw = document.getElementById("friendshipPreset").value.split("|");
+      const customDeltaRaw = document.getElementById("customBtcDelta").value;
 
-            modal.classList.remove('hidden');
-        }
+      const delta = customDeltaRaw !== "" ? Number(customDeltaRaw) : Number(presetRaw[1]);
+      const newTier = customDeltaRaw !== ""
+        ? (delta >= 0 ? "FAVORED OPERATIVE" : "SUSPECT OPERATIVE")
+        : presetRaw[2];
 
-        function closeCreatePostModal() {
-            document.getElementById('createPostModal').classList.add('hidden');
-        }
+      const wallet = ensureWallet(target);
+      wallet.btc = Math.max(0, Number((wallet.btc + delta).toFixed(4)));
+      wallet.tier = newTier;
 
-        async function handleCreatePost(e) {
-            e.preventDefault();
+      const actionWord = delta >= 0 ? `granted +${formatBtc(delta)} BTC to` : `seized ${formatBtc(Math.abs(delta))} BTC from`;
+      state.messages.push({
+        nick: "SYS_ADMIN",
+        text: `DECREE: Sys-Admin ${actionWord} [${target}]. New Status: ${newTier} (${formatBtc(wallet.btc)} BTC).`,
+        ts: nowTime(),
+        isSys: true
+      });
 
-            const title = document.getElementById('postTitle').value;
-            const author = document.getElementById('postAuthor').value;
-            const tag = document.getElementById('postTag').value;
-            const content = document.getElementById('postContent').value;
-            const urlInput = document.getElementById('postImageUrl').value;
-            const fileInput = document.getElementById('postImageFile').files[0];
+      document.getElementById("customBtcDelta").value = "";
+      saveState(state);
+    });
 
-            let finalImageUrl = urlInput;
+    document.getElementById("setAliasBtn").addEventListener("click", () => {
+      const nextAlias = escapeClean(document.getElementById("activeAliasInput").value);
+      if (!nextAlias) return;
+      currentAlias = nextAlias;
+      localStorage.setItem(ALIAS_KEY, currentAlias);
+      ensureWallet(currentAlias);
+      saveState(state);
+    });
 
-            if (fileInput) {
-                finalImageUrl = await convertFileToBase64(fileInput);
-            }
+    document.getElementById("newListingForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = escapeClean(document.getElementById("itemTitle").value);
+      const startBid = Math.max(0.0001, Number(document.getElementById("startBid").value) || 0.001);
+      const vendor = escapeClean(document.getElementById("vendorName").value) || currentAlias;
+      const desc = escapeClean(document.getElementById("itemDesc").value);
+      if (!title || !desc) return;
 
-            const newPost = {
-                id: Date.now().toString(),
-                type: (isAdmin && currentTab === 'official') ? 'official' : 'student',
-                title: title,
-                author: author,
-                date: new Date().toISOString().split('T')[0],
-                tag: tag || 'General',
-                content: content,
-                imageUrl: finalImageUrl,
-                likes: 0
-            };
+      const id = `HWY-${Math.floor(100 + Math.random() * 900)}`;
+      state.listings.unshift({
+        id,
+        title,
+        desc,
+        vendor,
+        highestBid: startBid,
+        highestBidder: "None yet"
+      });
+      state.messages.push({
+        nick: "HIGHWAY_INDEX",
+        text: `New listing [${id}] "${title}" by ${vendor} starting at ${formatBtc(startBid)} BTC.`,
+        ts: nowTime(),
+        isSys: true
+      });
+      e.target.reset();
+      saveState(state);
+    });
 
-            posts.unshift(newPost);
-            savePosts();
-            closeCreatePostModal();
+    document.getElementById("chatForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = escapeClean(document.getElementById("chatText").value);
+      if (!text) return;
 
-            // Reset form
-            e.target.reset();
+      ensureWallet(currentAlias);
+      state.messages.push({
+        nick: currentAlias,
+        text,
+        ts: nowTime(),
+        isSys: currentAlias.toLowerCase() === "sys_admin"
+      });
+      document.getElementById("chatText").value = "";
+      saveState(state);
+    });
 
-            // Render updated posts
-            renderPosts();
-        }
+    document.getElementById("reportForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const target = escapeClean(document.getElementById("reportTarget").value);
+      const reason = escapeClean(document.getElementById("reportReason").value);
+      const details = escapeClean(document.getElementById("reportDetails").value);
+      if (!target || !details) return;
 
-        // UTILITY FUNCTIONS
-        function convertFileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
+      const id = `RPT-${Math.floor(10 + Math.random() * 90)}`;
+      state.reports.push({ id, target, reason, details, ts: nowTime() });
+      state.messages.push({
+        nick: "SNITCH_DESK",
+        text: `Report ${id} filed against ${target} (${reason}). Sys-Admin notified.`,
+        ts: nowTime(),
+        isSys: true
+      });
+      e.target.reset();
+      saveState(state);
+    });
 
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(posts, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "loyola_news_backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
+    document.getElementById("resetDemoBtn").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      state = loadState();
+      renderAll();
+    });
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, "&amp;")
-                      .replace(/</g, "&lt;")
-                      .replace(/>/g, "&gt;")
-                      .replace(/"/g, "&quot;")
-                      .replace(/'/g, "&#039;");
-        }
-    </script>
+    renderAll();
+  </script>
 </body>
 </html>
