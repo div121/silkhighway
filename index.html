@@ -3,753 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SILK HIGHWAY //</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>SILK HIGHWAY // Shutdown Notice</title>
   <style>
     :root{--bg:#070908;--panel:#0d120f;--panel-2:#121915;--border:#1e2d24;--text:#d7e5dc;--muted:#7c9486;--accent:#22e584;--btc:#f7931a;--warn:#f5b700;--danger:#ff4d5a;--mono:"JetBrains Mono","Fira Code",Consolas,monospace}
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.5}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.6}
     header{border-bottom:1px solid var(--border);background:#0a0e0c;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center}
     .brand{font-weight:700;color:var(--accent);letter-spacing:.08em;font-size:16px}
-    .header-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .onion-tag{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--border);padding:5px 9px;border-radius:4px}
-    .wallet-pill{font-size:12px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.4);color:var(--btc);padding:5px 10px;border-radius:4px;font-weight:700}
+    .wallet-pill{font-size:12px;background:rgba(255,77,90,.12);border:1px solid rgba(255,77,90,.45);color:var(--danger);padding:5px 10px;border-radius:4px;font-weight:700}
     .banner{background:rgba(245,183,0,.08);border-bottom:1px solid rgba(245,183,0,.3);color:var(--warn);font-size:12px;padding:8px 20px}
-    .container{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1.6fr 1fr;gap:20px}
-    @media(max-width:900px){.container{grid-template-columns:1fr}}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:18px}
-    .admin-card{border-color:var(--btc);background:#14110b;display:none}
-    .admin-card.open{display:block}
+    main{max-width:720px;margin:0 auto;padding:20px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:18px}
+    h1{margin:0 0 6px;font-size:20px;color:var(--danger);text-transform:uppercase;letter-spacing:.06em}
     h2{margin:0 0 12px;font-size:14px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
-    .admin-card h2{color:var(--btc)}
-    h3{margin:14px 0 8px;font-size:12px;color:var(--btc);text-transform:uppercase;letter-spacing:.04em}
-    .listing{background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:12px;margin-bottom:12px}
+    p{margin:0 0 12px}
+    .small-note{font-size:11px;color:var(--muted)}
+    .listing{background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:12px;margin:12px 0}
     .listing.closed{opacity:.72;border-style:dashed}
-    .listing-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+    .status-pill{font-size:11px;padding:2px 6px;border-radius:3px;margin-left:6px;background:rgba(255,77,90,.16);color:var(--danger)}
     .listing-title{font-weight:700;color:#fff}
-    .status-pill{font-size:11px;padding:2px 6px;border-radius:3px;margin-left:6px;background:rgba(34,229,132,.14);color:var(--accent)}
-    .status-pill.closed{background:rgba(255,77,90,.16);color:var(--danger)}
-    .bid-price{color:var(--btc);font-weight:700;white-space:nowrap}
-    .meta{font-size:12px;color:var(--muted);margin:6px 0 10px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
-    input,select,textarea,button{font-family:var(--mono);font-size:13px;border-radius:4px;border:1px solid var(--border)}
-    input,select,textarea{background:var(--bg);color:var(--text);padding:8px 10px}
-    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
-    button{background:var(--accent);color:#05110a;font-weight:700;padding:8px 12px;cursor:pointer;border:none}
-    button:hover{filter:brightness(1.08)}
-    button.btc-btn{background:var(--btc);color:#140b00}
-    button.danger{background:var(--danger);color:#fff}
-    button.secondary{background:var(--panel-2);color:var(--text);border:1px solid var(--border)}
-    .feed{max-height:230px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px;font-size:12px}
+    .bid-price{color:var(--btc);font-weight:700}
+    .feed{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px 12px;font-size:12px}
     .msg{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)}
     .msg:last-child{border-bottom:none}
-    .nick{color:var(--accent);font-weight:700}
     .sys-nick{color:var(--btc);font-weight:700}
-    .report-badge{color:var(--danger);font-weight:700}
-    .small-note{font-size:11px;color:var(--muted)}
-    .lb-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px}
-    .lb-row:last-child{border-bottom:none}
-    .lb-rank{color:var(--muted);width:26px}
-    .lb-user{font-weight:700;color:#fff}
-    .lb-user.admin-user{color:var(--btc)}
-    .lb-tier{font-size:10px;color:var(--muted)}
-    .lb-btc{color:var(--btc);font-weight:700;white-space:nowrap}
-    .user-mgmt-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
-    .user-mgmt-row:last-child{border-bottom:none}
+    .nick{color:var(--accent);font-weight:700}
+    .cursor{display:inline-block;width:8px;height:14px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
+    @media (prefers-reduced-motion:reduce){.cursor{animation:none}}
   </style>
 </head>
 <body>
   <header>
-    <div><span class="brand">// SILK HIGHWAY v1.1 (beta)</span></div>
-    <div class="header-right">
-      <div class="wallet-pill" id="walletDisplay">GUEST (LOG IN TO PLAY)</div>
+    <div><span class="brand">// SILK HIGHWAY</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <div class="wallet-pill">SERVERS: OFFLINE</div>
       <div class="onion-tag">http://silkhighway9x4v2.onion</div>
-      <button type="button" class="secondary" id="adminToggleBtn">[SYS-ADMIN: r4ven]</button>
     </div>
   </header>
 
   <div class="banner">
-    Max wallet cap: 100,000.0000 BTC. Alphanumeric passwords (6+ chars, letters &amp; numbers) required for cross-device accounts.
+   [SHUTDOWN NOTICE] 
   </div>
 
-  <main class="container">
-    <section>
-      <div class="card admin-card" id="adminPanel">
-        <h2>// SYS-ADMIN TREASURY &amp; OPERATIVE CONTROL (r4ven)</h2>
-        <div class="small-note">
-          Grant/seize BTC via friendship presets, or edit/reset passwords/delete any operative account below.
-        </div>
+  <main>
+    <div class="card">
+      <h1>Silk Highway has been shut down</h1>
+      <div class="small-note">Final status: ended by r4ven, no further bids accepted.</div>
+    </div>
 
-        <h3>1. Quick Friendship Decree</h3>
-        <form id="adminTreasuryForm">
-          <div class="row">
-            <input id="targetOperative" placeholder="Username (or r4ven)" required style="flex:1; min-width:140px;" />
-            <select id="friendshipPreset">
-              <option value="Day-One Homie (+2.5000 BTC)|2.5|DAY-ONE HOMIE">Day-One Homie (+2.5000 BTC)</option>
-              <option value="Sent Good Memes (+0.5000 BTC)|0.5|MEME DEALER">Sent Good Memes (+0.5000 BTC)</option>
-              <option value="Left Me On Read (-0.2500 BTC)|-0.25|ON THIN ICE">Left Me On Read (-0.2500 BTC)</option>
-              <option value="Snitched / Betrayal (-5.0000 BTC)|-5.0|EXCOMMUNICATED">Snitched / Betrayal (-5.0000 BTC)</option>
-            </select>
-          </div>
-          <div class="row">
-            <input id="customBtcDelta" type="number" step="0.0001" placeholder="Or custom +/- BTC (e.g. 25000 or -0.5)" style="flex:1;" />
-            <button type="submit" class="btc-btn">Execute Decree</button>
-          </div>
-        </form>
+    <div class="card">
+      <h2>A message from r4ven</h2>
+      <p>Operatives,</p>
+      <p>
+        It’s been a wild ride.Five days of auctions, bad jokes, questionable contraband listings, and at least one
+        person begging me for BTC. Honestly? Worth it.
+      </p>
+      <p>
+        Running a database means patches, updates, and keeping an eye on security, and that’s a lot to ask of a
+        hobby project that outlived its player base by roughly 72 hours. So the Highway is closing. Every wallet is
+        now worth exactly what it was always worth: bragging rights.
+      </p>
+      <p>
+        Thank you to everyone who registered, bid, snitched, hacked the mainframe, or just lurked in the chatter.
+        You made a tiny parody darknet feel alive for a little while.
+      </p>
+      <p>gg, trainers. ⚡</p>
+      <p><span class="nick">// r4ven</span> <span class="cursor"></span></p>
+    </div>
 
-        <h3>2. Full User Modification &amp; Password Reset</h3>
-        <form id="adminModifyUserForm">
-          <div class="row">
-            <input id="modUsername" placeholder="Target Username" required style="flex:1; min-width:130px;" />
-            <input id="modExactBtc" type="number" step="0.0001" min="0" max="100000" placeholder="Set Exact BTC" required style="width:135px;" />
-          </div>
-          <div class="row">
-            <input id="modTier" placeholder="New Tier Title (e.g. INNER CIRCLE)" required style="flex:1; min-width:140px;" />
-            <input id="modNewPassword" type="text" placeholder="Optional: New Alphanumeric Pass" style="flex:1; min-width:140px;" />
-            <button type="submit" class="btc-btn">Update User</button>
-          </div>
-        </form>
-
-        <h3>3. Registered Operatives</h3>
-        <div id="adminUserRoster" class="feed" style="max-height: 165px;"></div>
+    <div class="card">
+      <h2>Final listings</h2>
+      <div class="listing closed">
+        <span class="listing-title">[HWY-∞] Silk Highway, entire platform</span><span class="status-pill">ENDED</span>
+        <div class="small-note" style="margin-top:6px;">Sold to: nobody. Top bid: <span class="bid-price">0.0000 BTC</span>. Vendor retired.</div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>Live Auctions &amp; Parody Contracts</h2>
-        <div id="listingsContainer"></div>
+    <div class="card">
+      <h2>What we built together</h2>
+      <div class="feed">
+        <div class="msg"><span class="sys-nick">ESCROW_BOT: </span>Live auctions with locked-in bids.</div>
+        <div class="msg"><span class="sys-nick">SNITCH_DESK: </span>A dispute desk for settling beef.</div>
+        <div class="msg"><span class="sys-nick">TRANSFER_BOT: </span>Player-to-player BTC, minus the mining fee.</div>
+        <div class="msg"><span class="sys-nick">HACK_BOT: </span>A daily puzzle, streaks, and first-solver glory.</div>
+        <div class="msg"><span class="sys-nick">HIGHWAY_INDEX: </span>Connection closed. Thanks for playing.</div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>List New Contraband / Consultation</h2>
-        <form id="newListingForm">
-          <div class="row">
-            <input id="itemTitle" placeholder="Item / 'Target' (e.g. Wi-Fi Password of Neighbor's Toaster)" required style="flex:2; min-width:180px;" />
-            <input id="startBid" type="number" step="0.0001" min="0.0001" max="100000" value="0.0020" placeholder="Start BTC" required style="width:120px;" />
-          </div>
-          <div class="row">
-            <input id="itemDesc" placeholder="Joke pitch / escrow rules..." required style="flex:1; min-width:180px;" />
-          </div>
-          <div class="row">
-            <button type="submit">Publish as Logged-In Operative</button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <aside>
-      <div class="card">
-        <h2>Operative Account (Any Device)</h2>
-        <form id="authForm">
-          <div class="row">
-            <input id="authAliasInput" placeholder="Username" required style="flex:1; min-width:125px;" />
-            <input id="authPassInput" type="password" placeholder="Alphanumeric Pass (6+)" minlength="6" required style="flex:1; min-width:125px;" />
-            <button type="submit" class="secondary">Login / Register</button>
-          </div>
-        </form>
-        <div class="row" style="justify-content: space-between;">
-          <span class="small-note" id="authStatusText">Use letters + numbers (6+ chars) to register or log in.</span>
-          <button type="button" class="secondary" id="logoutBtn" style="padding:4px 8px; font-size:11px;">Logout</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>BTC Rich-List Leaderboard</h2>
-        <div id="leaderboardList" class="feed" style="max-height: 185px;"></div>
-      </div>
-
-      <div class="card">
-        <h2>Daily Hack the Mainframe</h2>
-        <div id="hackBox"></div>
-        <form id="hackForm">
-          <div class="row">
-            <input id="hackAnswer" placeholder="Password (lowercase)..." required autocomplete="off" style="flex:1; min-width:130px;" />
-            <button type="submit" class="btc-btn">Hack</button>
-          </div>
-        </form>
-        <div class="small-note" id="hackMsg"></div>
-      </div>
-
-      <div class="card">
-        <h2>Send BTC (2% network fee burned)</h2>
-        <form id="transferForm">
-          <div class="row">
-            <input id="transferTo" placeholder="Username" required style="flex:1; min-width:110px;" />
-            <input id="transferAmt" type="number" step="0.0001" min="0.0001" placeholder="BTC" required style="width:100px;" />
-          </div>
-          <div class="row">
-            <input id="transferNote" placeholder="Memo (optional)" maxlength="80" style="flex:1; min-width:120px;" />
-            <button type="submit" class="btc-btn">Send</button>
-          </div>
-        </form>
-        <div class="small-note">Tip: tap a leaderboard row to fill the recipient.</div>
-      </div>
-
-      <div class="card">
-        <h2>Encrypted Comms (Chatter)</h2>
-        <div id="chatFeed" class="feed"></div>
-        <form id="chatForm">
-          <div class="row">
-            <input id="chatText" placeholder="Beg r4ven for BTC or talk smack..." required style="flex:1; min-width:140px;" />
-            <button type="submit">Send</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>System Events (Bots)</h2>
-        <div id="eventsFeed" class="feed" style="max-height: 185px;"></div>
-      </div>
-
-      <div class="card">
-        <h2>Dispute &amp; Snitch Report Desk</h2>
-        <div id="reportsFeed" class="feed"></div>
-        <form id="reportForm">
-          <div class="row">
-            <input id="reportTarget" placeholder="Suspect / Listing ID" required style="flex:1; min-width:130px;" />
-            <select id="reportReason">
-              <option value="Fake Friendship / Clout Chasing">Fake Friendship / Clout Chasing</option>
-              <option value="Script Kiddie Alert">Script Kiddie Alert</option>
-              <option value="Fake Zero-Day">Fake Zero-Day</option>
-              <option value="Broke Wallet Energy">Broke Wallet Energy</option>
-            </select>
-          </div>
-          <div class="row">
-            <textarea id="reportDetails" rows="2" placeholder="Snitch on them to r4ven..." required style="width:100%;"></textarea>
-          </div>
-          <div class="row">
-            <button type="submit" class="danger">File Report</button>
-          </div>
-        </form>
-      </div>
-    </aside>
+    <div class="small-note" style="text-align:center;padding-bottom:20px;">
+      // SILK HIGHWAY v1.1 BETA, 2026. A parody sandbox with imaginary coins. No real money, no real contraband.
+    </div>
   </main>
-
-  <script>
-    const SUPABASE_URL = "https://cfuiiorovpoxnxrkempl.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_EDDPhoMxk3DaGFvlAlgqjg_uXVam5GF";
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const SYS_ADMIN_HANDLE = "r4ven", MAX_BTC_CAP = 100000, SESSION_KEY = "silk_highway_session_v1";
-    const $ = (id) => document.getElementById(id);
-
-    let state = { wallets: {}, listings: [], messages: [], reports: [], events: [], streaks: {} };
-    let adminToken = "", userToken = "", hackState = null;
-    let currentHandle = null, currentDisplayName = null, refreshTimer = null;
-
-    const isReservedAdminHandle = (n) => String(n).trim().toLowerCase() === SYS_ADMIN_HANDLE;
-    const isAdminUnlocked = () => currentHandle === SYS_ADMIN_HANDLE && adminToken.length > 0;
-    const tok = () => adminToken || userToken;
-    const isValidAlphanumericPass = (pw) => typeof pw === "string" && pw.length >= 6 && /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw);
-    const clampBtc = (a) => Number(Math.min(MAX_BTC_CAP, Math.max(0, Number(a))).toFixed(4));
-    const formatBtc = (n) => clampBtc(n).toFixed(4);
-    const escapeClean = (s) => String(s).trim().slice(0, 220);
-    const formatTs = (iso) => (iso ? new Date(iso).toTimeString().slice(0, 5) : "--:--");
-
-    function streakTag(handle) {
-      const s = state.streaks[handle];
-      const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-      return s && s.streak > 0 && s.last_solved >= y ? ` 🔥${s.streak}` : "";
-    }
-
-    function clearSession() {
-      adminToken = ""; userToken = ""; currentHandle = null; currentDisplayName = null; hackState = null;
-      try { localStorage.removeItem(SESSION_KEY); } catch {}
-      $("adminPanel").classList.remove("open");
-      renderAll();
-    }
-
-    async function call(name, args) {
-      const r = await db.rpc(name, args);
-      if (r.error && /Session expired/i.test(r.error.message)) {
-        clearSession();
-        alert("Session expired. Please log in again.");
-      }
-      return r;
-    }
-
-    async function hashPassword(handle, password) {
-      const enc = new TextEncoder();
-      const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(`${handle.toLowerCase()}:${password}`), "PBKDF2", false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits(
-        { name: "PBKDF2", salt: enc.encode("silk_highway_salt_final"), iterations: 100000, hash: "SHA-256" },
-        keyMaterial, 256
-      );
-      return Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, "0")).join("");
-    }
-
-    async function refreshAllFromDB() {
-      const [wRes, lRes, mRes, rRes, eRes, sRes] = await Promise.all([
-        db.from("wallets").select("handle, display_name, btc, tier"),
-        db.from("listings").select("*").order("created_at", { ascending: false }),
-        db.from("messages").select("*").order("id", { ascending: true }).limit(150),
-        db.from("reports").select("*").order("created_at", { ascending: true }).limit(50),
-        db.from("events").select("*").order("id", { ascending: false }).limit(80),
-        db.from("hack_stats").select("handle, streak, best_streak, last_solved")
-      ]);
-
-      if (wRes.data) {
-        const map = {};
-        wRes.data.forEach((w) => {
-          map[w.handle] = { displayName: w.display_name || w.handle, btc: Number(w.btc), tier: w.tier };
-        });
-        state.wallets = map;
-        if (currentHandle && !isAdminUnlocked() && !map[currentHandle]) {
-          clearSession();
-          alert("Your account was removed by Sys-Admin r4ven.");
-        }
-      }
-      if (lRes.data) state.listings = lRes.data;
-      if (mRes.data) state.messages = mRes.data;
-      if (rRes.data) state.reports = rRes.data;
-      if (eRes.data) state.events = eRes.data.slice().reverse();
-      if (sRes.data) {
-        const m = {};
-        sRes.data.forEach((s) => { m[s.handle] = s; });
-        state.streaks = m;
-      }
-      if (tok()) {
-        const hs = await call("hack_status", { p_token: tok() });
-        hackState = hs.error ? null : hs.data;
-      } else hackState = null;
-
-      renderAll();
-    }
-
-    function scheduleRefresh() {
-      clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(() => { refreshAllFromDB(); }, 150);
-    }
-
-    db.channel("silk-highway-live")
-      .on("postgres_changes", { event: "*", schema: "public" }, () => { scheduleRefresh(); })
-      .subscribe();
-
-    function renderWalletHeader() {
-      const display = $("walletDisplay"), statusEl = $("authStatusText");
-      if (!currentHandle) {
-        display.textContent = "GUEST (LOG IN TO PLAY)";
-        statusEl.textContent = "Use letters + numbers (6+ chars) to register or log in.";
-        return;
-      }
-      const wallet = state.wallets[currentHandle] || { displayName: currentDisplayName || currentHandle, btc: 0.0050, tier: "UNVERIFIED RANDOM" };
-      const shownName = wallet.displayName || currentDisplayName || currentHandle;
-      display.textContent = `${shownName}: ${formatBtc(wallet.btc)} BTC [${wallet.tier}]`;
-      statusEl.textContent = "Logged in as ";
-      const strong = document.createElement("strong");
-      strong.textContent = shownName;
-      statusEl.append(strong, ".");
-    }
-
-    function renderAdminRoster() {
-      const rosterEl = $("adminUserRoster");
-      rosterEl.innerHTML = "";
-      Object.entries(state.wallets).sort((a, b) => b[1].btc - a[1].btc).forEach(([handle, info]) => {
-        const row = document.createElement("div");
-        row.className = "user-mgmt-row";
-        const label = document.createElement("span");
-        label.textContent = `${info.displayName || handle} — ${formatBtc(info.btc)} BTC [${info.tier}]`;
-        const btns = document.createElement("div");
-        btns.style.display = "flex";
-        btns.style.gap = "6px";
-
-        const editBtn = document.createElement("button");
-        editBtn.type = "button";
-        editBtn.className = "secondary";
-        editBtn.style.padding = "3px 7px";
-        editBtn.style.fontSize = "11px";
-        editBtn.textContent = "Edit";
-        editBtn.onclick = () => {
-          $("modUsername").value = handle;
-          $("modExactBtc").value = formatBtc(info.btc);
-          $("modTier").value = info.tier;
-          $("modNewPassword").value = "";
-        };
-        btns.appendChild(editBtn);
-
-        if (handle !== SYS_ADMIN_HANDLE) {
-          const delBtn = document.createElement("button");
-          delBtn.type = "button";
-          delBtn.className = "danger";
-          delBtn.style.padding = "3px 7px";
-          delBtn.style.fontSize = "11px";
-          delBtn.textContent = "Delete";
-          delBtn.onclick = async () => {
-            if (!confirm(`Delete operative '${info.displayName || handle}' and remove their listings?`)) return;
-            const { error } = await call("r4ven_delete_user", { p_token: adminToken, p_target: handle });
-            if (error) alert(error.message);
-            else await refreshAllFromDB();
-          };
-          btns.appendChild(delBtn);
-        }
-        row.append(label, btns);
-        rosterEl.appendChild(row);
-      });
-    }
-
-    function renderLeaderboard() {
-      const listEl = $("leaderboardList");
-      listEl.innerHTML = "";
-      const entries = Object.entries(state.wallets)
-        .map(([handle, info]) => ({ handle, displayName: info.displayName || handle, btc: clampBtc(info.btc), tier: info.tier || "OPERATIVE" }))
-        .sort((a, b) => b.btc - a.btc);
-
-      entries.forEach((entry, idx) => {
-        const row = document.createElement("div");
-        row.className = "lb-row";
-        row.style.cursor = "pointer";
-        row.onclick = () => { $("transferTo").value = entry.handle; $("transferAmt").focus(); };
-
-        const left = document.createElement("div");
-        const rank = document.createElement("span");
-        rank.className = "lb-rank";
-        rank.textContent = `#${idx + 1}`;
-        const user = document.createElement("span");
-        user.className = entry.handle === SYS_ADMIN_HANDLE ? "lb-user admin-user" : "lb-user";
-        user.textContent = ` ${entry.displayName}`;
-        const tier = document.createElement("div");
-        tier.className = "lb-tier";
-        tier.style.paddingLeft = "26px";
-        tier.textContent = entry.tier + streakTag(entry.handle);
-        left.append(rank, user, tier);
-
-        const amount = document.createElement("span");
-        amount.className = "lb-btc";
-        amount.textContent = `${formatBtc(entry.btc)} BTC`;
-        row.append(left, amount);
-        listEl.appendChild(row);
-      });
-    }
-
-    function renderListings() {
-      const container = $("listingsContainer");
-      container.innerHTML = "";
-      if (state.listings.length === 0) {
-        container.innerHTML = `<div class="small-note">No active listings yet.</div>`;
-        return;
-      }
-      state.listings.forEach((item) => {
-        const box = document.createElement("div");
-        box.className = item.is_closed ? "listing closed" : "listing";
-
-        const top = document.createElement("div");
-        top.className = "listing-top";
-        const titleWrap = document.createElement("div");
-        const title = document.createElement("span");
-        title.className = "listing-title";
-        title.textContent = `[${item.id}] ${item.title}`;
-        const pill = document.createElement("span");
-        pill.className = item.is_closed ? "status-pill closed" : "status-pill";
-        pill.textContent = item.is_closed ? "ENDED" : "LIVE";
-        titleWrap.append(title, pill);
-        const bid = document.createElement("span");
-        bid.className = "bid-price";
-        bid.textContent = `${formatBtc(item.highest_bid)} BTC`;
-        top.append(titleWrap, bid);
-
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = `Listed by: ${item.vendor} | Top Bidder: ${item.highest_bidder || "None"} — ${item.description}`;
-        box.append(top, meta);
-
-        const controlsRow = document.createElement("div");
-        controlsRow.className = "row";
-
-        if (!item.is_closed) {
-          const amountInput = document.createElement("input");
-          amountInput.type = "number";
-          amountInput.step = "0.0001";
-          amountInput.min = formatBtc(Number(item.highest_bid) + 0.0005);
-          amountInput.max = String(MAX_BTC_CAP);
-          amountInput.value = formatBtc(Number(item.highest_bid) + 0.0010);
-          amountInput.style.width = "135px";
-
-          const bidBtn = document.createElement("button");
-          bidBtn.className = "btc-btn";
-          bidBtn.textContent = currentHandle ? `Bid as ${currentDisplayName || currentHandle}` : "Log In to Bid";
-          bidBtn.onclick = async () => {
-            if (!currentHandle) return alert("Log in with your username & password first.");
-            const { error } = await call("place_bid", { p_token: tok(), p_listing_id: item.id, p_amount: Number(amountInput.value) });
-            if (error) alert(`Bid rejected: ${error.message}`);
-            else await refreshAllFromDB();
-          };
-          controlsRow.append(amountInput, bidBtn);
-        }
-
-        const isOwner = currentHandle && (item.vendor.toLowerCase() === currentHandle.toLowerCase() || isAdminUnlocked());
-        if (!item.is_closed && isOwner) {
-          const endBtn = document.createElement("button");
-          endBtn.className = "danger";
-          endBtn.textContent = "End Auction";
-          endBtn.onclick = async () => {
-            const { error } = await call("end_auction", { p_token: tok(), p_listing_id: item.id });
-            if (error) alert(error.message);
-            else await refreshAllFromDB();
-          };
-          controlsRow.append(endBtn);
-        }
-
-        if (controlsRow.childNodes.length > 0) box.appendChild(controlsRow);
-        container.appendChild(box);
-      });
-    }
-
-    function renderChat() {
-      const feed = $("chatFeed");
-      feed.innerHTML = "";
-      state.messages.forEach((m) => {
-        const div = document.createElement("div");
-        div.className = "msg";
-        const timeSpan = document.createElement("span");
-        timeSpan.className = "small-note";
-        timeSpan.textContent = `[${formatTs(m.created_at)}] `;
-        const nickSpan = document.createElement("span");
-        nickSpan.className = m.is_sys ? "sys-nick" : "nick";
-        nickSpan.textContent = `${m.nick}: `;
-        const textSpan = document.createElement("span");
-        textSpan.textContent = m.text;
-        div.append(timeSpan, nickSpan, textSpan);
-        feed.appendChild(div);
-      });
-      feed.scrollTop = feed.scrollHeight;
-    }
-
-    function renderEvents() {
-      const feed = $("eventsFeed");
-      feed.innerHTML = "";
-      state.events.forEach((ev) => {
-        const div = document.createElement("div");
-        div.className = "msg";
-        const t = document.createElement("span");
-        t.className = "small-note";
-        t.textContent = `[${formatTs(ev.created_at)}] `;
-        const k = document.createElement("span");
-        k.className = "sys-nick";
-        k.textContent = `${ev.kind}: `;
-        const x = document.createElement("span");
-        x.textContent = ev.text;
-        div.append(t, k, x);
-        feed.appendChild(div);
-      });
-      feed.scrollTop = feed.scrollHeight;
-    }
-
-    function renderReports() {
-      const feed = $("reportsFeed");
-      feed.innerHTML = "";
-      if (state.reports.length === 0) {
-        feed.innerHTML = `<div class="small-note">No disputes filed yet.</div>`;
-        return;
-      }
-      state.reports.forEach((r) => {
-        const div = document.createElement("div");
-        div.className = "msg";
-        const header = document.createElement("div");
-        const badge = document.createElement("span");
-        badge.className = "report-badge";
-        badge.textContent = `[${r.id} // ${r.reason}] `;
-        const target = document.createElement("strong");
-        target.textContent = `Target: ${r.target}`;
-        header.append(badge, target);
-        const body = document.createElement("div");
-        body.textContent = `${r.details} (${formatTs(r.created_at)})`;
-        div.append(header, body);
-        feed.appendChild(div);
-      });
-      feed.scrollTop = feed.scrollHeight;
-    }
-
-    function renderHack() {
-      const box = $("hackBox"), form = $("hackForm");
-      box.innerHTML = "";
-      const line = (txt, cls) => {
-        const d = document.createElement("div");
-        d.className = cls || "small-note";
-        d.textContent = txt;
-        box.appendChild(d);
-      };
-      const h = hackState;
-      if (!currentHandle) { form.style.display = "none"; return line("Log in to hack the mainframe."); }
-      if (!h || !h.available) { form.style.display = "none"; return line("No puzzle loaded."); }
-      form.style.display = h.solved || h.attempts_left === 0 ? "none" : "";
-      line(`Puzzle #${h.n} ${"★".repeat(h.difficulty)}${"☆".repeat(5 - h.difficulty)} // ${String(h.kind).toUpperCase()}`, "listing-title");
-      line(h.prompt, "meta");
-      const pre = document.createElement("div");
-      pre.className = "feed";
-      pre.style.cssText = "max-height:none;word-break:break-all;color:var(--btc);";
-      pre.textContent = h.payload;
-      box.appendChild(pre);
-      if (h.hint) line(`Hint: ${h.hint}`);
-      line(h.solved ? `✅ Breached today (+${formatBtc(h.reward)} BTC).` : `${h.attempts_left}/5 tries left.`);
-      line(`🔥 Streak: ${h.streak} (best ${h.best_streak}). Bonus every 5 days. Resets 00:00 UTC.`);
-      const names = (h.solvers || []).map((s) => `#${s.rank} ${(state.wallets[s.handle] && state.wallets[s.handle].displayName) || s.handle}`).join("  ");
-      line(`Today's hackers (${h.solver_count}): ${names || "none yet, be first (+0.0500)"}`);
-    }
-
-    function renderAll() {
-      renderWalletHeader();
-      renderAdminRoster();
-      renderLeaderboard();
-      renderListings();
-      renderChat();
-      renderEvents();
-      renderHack();
-      renderReports();
-    }
-
-    $("authForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const rawUsername = $("authAliasInput").value.trim();
-      const lowerHandle = rawUsername.toLowerCase();
-      const pass = $("authPassInput").value;
-      if (isReservedAdminHandle(lowerHandle)) return alert("Username 'r4ven' is reserved. Use [SYS-ADMIN: r4ven] in the header.");
-      if (!isValidAlphanumericPass(pass)) return alert("Password must be at least 6 characters and include both letters and numbers.");
-
-      const passHash = await hashPassword(lowerHandle, pass);
-      const { data, error } = await db.rpc("login_operative", { p_username: rawUsername, p_password_hash: passHash });
-      if (error) return alert(error.message);
-
-      adminToken = "";
-      $("adminPanel").classList.remove("open");
-      userToken = data.token;
-      currentHandle = data.handle;
-      currentDisplayName = data.display_name;
-      try { localStorage.setItem(SESSION_KEY, JSON.stringify({ token: userToken })); } catch {}
-      $("authPassInput").value = "";
-      await refreshAllFromDB();
-    });
-
-    $("logoutBtn").addEventListener("click", () => {
-      if (tok()) db.rpc("logout", { p_token: tok() });
-      clearSession();
-    });
-
-    $("adminToggleBtn").addEventListener("click", async () => {
-      const panel = $("adminPanel");
-      if (isAdminUnlocked() && panel.classList.contains("open")) return panel.classList.remove("open");
-      const pin = prompt("Enter Sys-Admin (r4ven) PIN:");
-      if (!pin) return;
-      const { data, error } = await db.rpc("login_admin", { p_pin: pin });
-      if (error || !data || !data.ok) {
-        return alert(data && data.error === "LOCKED" ? "LOCKED. Too many attempts, try again in 15 minutes." : "ACCESS DENIED.");
-      }
-      userToken = "";
-      adminToken = data.token;
-      currentHandle = SYS_ADMIN_HANDLE;
-      currentDisplayName = SYS_ADMIN_HANDLE;
-      try { localStorage.removeItem(SESSION_KEY); } catch {}
-      panel.classList.add("open");
-      await refreshAllFromDB();
-    });
-
-    $("adminTreasuryForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!isAdminUnlocked()) return;
-      const rawTarget = escapeClean($("targetOperative").value).toLowerCase();
-      if (!rawTarget) return;
-      const presetRaw = $("friendshipPreset").value.split("|");
-      const customDeltaRaw = $("customBtcDelta").value;
-      const delta = customDeltaRaw !== "" ? Number(customDeltaRaw) : Number(presetRaw[1]);
-      if (!Number.isFinite(delta)) return alert("Invalid BTC amount.");
-      const tier = customDeltaRaw !== "" ? (delta >= 0 ? "FAVORED OPERATIVE" : "SUSPECT OPERATIVE") : presetRaw[2];
-      const { error } = await call("r4ven_treasury", { p_token: adminToken, p_target: rawTarget, p_delta: delta, p_tier: tier });
-      if (error) alert(error.message);
-      else { $("customBtcDelta").value = ""; await refreshAllFromDB(); }
-    });
-
-    $("adminModifyUserForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!isAdminUnlocked()) return;
-      const target = escapeClean($("modUsername").value).toLowerCase();
-      const exactBtc = Number($("modExactBtc").value);
-      const newTier = escapeClean($("modTier").value);
-      const newPass = $("modNewPassword").value.trim();
-      if (!target || !Number.isFinite(exactBtc) || !newTier) return;
-      let newPassHash = "";
-      if (newPass.length > 0) {
-        if (!isValidAlphanumericPass(newPass)) return alert("New password must be 6+ chars with both letters and numbers.");
-        newPassHash = await hashPassword(target, newPass);
-      }
-      const { error } = await call("r4ven_modify_user", { p_token: adminToken, p_target: target, p_new_btc: exactBtc, p_new_tier: newTier, p_new_password_hash: newPassHash });
-      if (error) alert(error.message);
-      else { $("modNewPassword").value = ""; await refreshAllFromDB(); }
-    });
-
-    $("newListingForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentHandle) return alert("Log in with your username & password first.");
-      const title = escapeClean($("itemTitle").value);
-      const startBid = clampBtc(Math.max(0.0001, Number($("startBid").value) || 0.001));
-      const desc = escapeClean($("itemDesc").value);
-      if (!title || !desc) return;
-      const { error } = await call("create_listing", { p_token: tok(), p_title: title, p_desc: desc, p_start_bid: startBid });
-      if (error) return alert(error.message);
-      e.target.reset();
-      await refreshAllFromDB();
-    });
-
-    $("chatForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentHandle) return alert("Log in with your username & password first.");
-      const text = escapeClean($("chatText").value);
-      if (!text) return;
-      const { error } = await call("post_message", { p_token: tok(), p_text: text });
-      if (error) return alert(error.message);
-      $("chatText").value = "";
-      await refreshAllFromDB();
-    });
-
-    $("reportForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentHandle) return alert("Log in with your username & password first.");
-      const target = escapeClean($("reportTarget").value);
-      const reason = escapeClean($("reportReason").value);
-      const details = escapeClean($("reportDetails").value);
-      if (!target || !details) return;
-      const { error } = await call("create_report", { p_token: tok(), p_target: target, p_reason: reason, p_details: details });
-      if (error) return alert(error.message);
-      e.target.reset();
-      await refreshAllFromDB();
-    });
-
-    $("transferForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentHandle) return alert("Log in with your username & password first.");
-      const to = escapeClean($("transferTo").value).toLowerCase();
-      const amount = Number($("transferAmt").value);
-      const note = escapeClean($("transferNote").value).slice(0, 80);
-      if (!to || !Number.isFinite(amount)) return;
-      const { error } = await call("send_btc", { p_token: tok(), p_to: to, p_amount: amount, p_note: note });
-      if (error) return alert(error.message);
-      e.target.reset();
-      await refreshAllFromDB();
-    });
-
-    $("hackForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!currentHandle) return alert("Log in with your username & password first.");
-      const { data, error } = await call("submit_hack", { p_token: tok(), p_answer: $("hackAnswer").value });
-      if (error) return alert(error.message);
-      $("hackMsg").textContent = data.ok
-        ? `ACCESS GRANTED! +${formatBtc(data.reward)} BTC, 🔥 ${data.streak}-day streak.`
-        : data.error === "NO_ATTEMPTS" ? "No attempts left today." : `ACCESS DENIED. ${data.attempts_left} tries left.`;
-      $("hackAnswer").value = "";
-      await refreshAllFromDB();
-    });
-
-    (async () => {
-      try { localStorage.removeItem("silk_highway_session_final"); } catch {}
-      try {
-        const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-        if (saved && saved.token) {
-          const { data, error } = await db.rpc("resume_session", { p_token: saved.token });
-          if (!error && data) {
-            userToken = saved.token;
-            currentHandle = data.handle;
-            currentDisplayName = data.display_name;
-          } else localStorage.removeItem(SESSION_KEY);
-        }
-      } catch {}
-      await refreshAllFromDB();
-    })();
-  </script>
 </body>
 </html>
